@@ -662,7 +662,7 @@
 
       <!-- In-Game Floating Welcome Toast for Mỹ Linh -->
       <div class="ingame-welcome-banner" id="ingameWelcomeBanner" aria-live="polite">
-        Chào mừng Mỹ Linh! Khéo léo hứng hoa và né mây mưa nhé! 🌹
+        Chào mừng vợ iu Mỹ Linh đến với game khu vườn hoa hồng 20/10! 🌹
       </div>
 
       <!-- Main Game Canvas -->
@@ -672,12 +672,12 @@
       <div class="overlay-layer" id="startOverlay">
         <div class="modal-card">
           <div class="modal-kicker">KỶ NIỆM NGÀY PHỤ NỮ VIỆT NAM 20/10</div>
-          <h1 class="modal-title">Giỏ Hoa 20/10 Tặng Mỹ Linh</h1>
+          <h1 class="modal-title">Giỏ Hoa 20/10 Tặng Công Chúa Mỹ Linh</h1>
 
           <!-- Rotating Welcome Messages for Mỹ Linh -->
           <div class="welcome-greeting-box" id="welcomeGreetingBox" title="Nhấn để xem lời nhắn khác">
             <p class="welcome-greeting-quote" id="welcomeGreetingText">
-              “Chào mừng công chúa Mỹ Linh đến với khu vườn hoa hồng 20/10! Hôm nay cùng thử tài hái hoa giải trí nhé.”
+              “Chào mừng vợ iu Mỹ Linh đến với game khu vườn hoa hồng 20/10!”
             </p>
             <div class="welcome-greeting-hint">Nhấn vào đây để xem lời nhắn tiếp theo</div>
           </div>
@@ -731,7 +731,7 @@
           <div class="modal-kicker">THỬ LẠI LẦN NỮA NHÉ</div>
           <h2 class="modal-title">Tiếc Quá, Giỏ Hoa Dính Mưa Rồi!</h2>
           <p class="modal-subtitle" id="gameOverMessage">
-            Mưa gió với deadline hơi nhiều một chút! Mỹ Linh bấm chơi lại để gom lại giỏ hoa 20/10 nhé.
+            Mưa gió với deadline hơi nhiều một chút! Công chúa Mỹ Linh bấm chơi lại để gom lại giỏ hoa 20/10 nhé.
           </p>
           <div class="btn-row">
             <button type="button" class="btn-primary" id="retryBtn">
@@ -744,12 +744,12 @@
       <!-- VICTORY OVERLAY -->
       <div class="overlay-layer victory-mode hidden" id="victoryOverlay">
         <div class="victory-banner-card">
-          <div class="modal-kicker">GỬI TẶNG VỢ YÊU MỸ LINH · 20/10</div>
+          <div class="modal-kicker">GỬI TẶNG VỢ IU MỸ LINH · 20/10</div>
           <blockquote class="victory-quote">
             “Happy Vietnamese Women's Day to my darling wifey! Love you always”
           </blockquote>
           <div class="victory-meta" id="victoryStatsText">
-            Chúc mừng vợ yêu Mỹ Linh! · Điểm số: 0 · Love Meter: 100%
+            Chúc mừng vợ iu Mỹ Linh! · Điểm số: 0 · Love Meter: 100%
           </div>
           <div class="btn-row">
             <button type="button" class="btn-primary" id="downloadCardBtn">
@@ -1037,19 +1037,19 @@
       const welcomeGreetingText = document.getElementById('welcomeGreetingText');
       const ingameWelcomeBanner = document.getElementById('ingameWelcomeBanner');
 
-      // Start screen messages ("công chúa Mỹ Linh" + natural welcome) & In-game encouragement
+      // Start screen messages & In-game encouragement
       const MY_LINH_WELCOME_MESSAGES = [
-        '“Chào mừng công chúa Mỹ Linh đến với khu vườn hoa hồng 20/10! Hôm nay cùng thử tài hái hoa giải trí nhé.”',
+        '“Chào mừng vợ iu Mỹ Linh đến với game khu vườn hoa hồng 20/10!”',
+        '“Chào mừng Công chúa Mỹ Linh đến với khu vườn hoa hồng 20/10! Hôm nay cùng thử tài hái hoa giải trí nhé.”',
         '“Công chúa Mỹ Linh thử tài hứng hoa xem được bao nhiêu điểm nhé — coi chừng mấy đám mây mưa với đồng hồ nha!”',
-        '“Chúc Mỹ Linh một ngày 20/10 thật nhiều niềm vui, luôn tươi tắn và nhiều năng lượng nhé!”',
-        '“Mẹo nhỏ cho Mỹ Linh: Cứ ưu tiên hứng trái tim hồng với hộp quà là đầy bình 100% nhanh lắm!”',
-        '“Sẵn sàng chưa Mỹ Linh ơi? Gom đủ 100% thanh năng lượng để mở món quà bất ngờ cuối game nhé!”'
+        '“Chúc vợ iu Mỹ Linh một ngày 20/10 thật nhiều niềm vui, luôn tươi tắn và nhiều năng lượng nhé!”',
+        '“Mẹo nhỏ cho Công chúa Mỹ Linh: Cứ ưu tiên hứng trái tim hồng với hộp quà là đầy bình 100% nhanh lắm!”'
       ];
 
       const MY_LINH_INGAME_GREETINGS = [
-        'Chào mừng Mỹ Linh! Khéo léo hứng hoa và né mây mưa nhé! 🌹',
-        'Bắt đầu thôi Mỹ Linh ơi, chúc một pha hái hoa thật mượt nha! ✨',
-        'Cố lên Mỹ Linh! Nhớ nhặt hộp quà để lấy nam châm hút hoa nhé! 🎁'
+        'Chào mừng vợ iu Mỹ Linh đến với game khu vườn hoa hồng 20/10! 🌹',
+        'Bắt đầu thôi Công chúa Mỹ Linh ơi, chúc một pha hái hoa thật mượt nha! ✨',
+        'Cố lên Công chúa Mỹ Linh! Nhớ nhặt hộp quà để lấy nam châm hút hoa nhé! 🎁'
       ];
 
       let currentWelcomeIdx = 0;
@@ -1302,10 +1302,10 @@
         if (currentState === STATE.PLAYING) {
           if (!milestone50Shown && clampedLove >= 50 && clampedLove < 80) {
             milestone50Shown = true;
-            showIngameToast('Giỏi quá Mỹ Linh ơi, được nửa chặng đường rồi! 👍', 3200);
+            showIngameToast('Giỏi quá Công chúa Mỹ Linh ơi, được nửa chặng đường rồi! 👍', 3500);
           } else if (!milestone80Shown && clampedLove >= 80 && clampedLove < 100) {
             milestone80Shown = true;
-            showIngameToast('Sắp đầy 100% rồi Mỹ Linh, cố thêm chút nữa thôi! ✨', 3200);
+            showIngameToast('Cố lên vợ yêu sắp thắng rồi! ✨', 3500);
           }
         }
 
@@ -1361,9 +1361,8 @@
         victoryOverlay.classList.add('hidden');
         updateHUD();
 
-        // Welcome Mỹ Linh when entering the game
-        const welcomeMsg = MY_LINH_INGAME_GREETINGS[Math.floor(Math.random() * MY_LINH_INGAME_GREETINGS.length)];
-        showIngameToast(welcomeMsg, 4500);
+        // Welcome vợ iu Mỹ Linh when entering the game
+        showIngameToast('Chào mừng vợ iu Mỹ Linh đến với game khu vườn hoa hồng 20/10! 🌹', 4500);
       }
 
       function triggerVictory() {
@@ -1376,7 +1375,7 @@
 
         const displayLove = Math.min(100, Math.round(loveMeter));
         victoryStatsText.textContent =
-          `Chúc mừng vợ yêu Mỹ Linh! · Điểm số: ${Math.floor(score)} · Love Meter: ${displayLove}% · Hoa & Tim đã gom: ${rosesCaught + heartsCaught}`;
+          `Chúc mừng vợ iu Mỹ Linh! · Điểm số: ${Math.floor(score)} · Love Meter: ${displayLove}% · Hoa & Tim đã gom: ${rosesCaught + heartsCaught}`;
         victoryOverlay.classList.remove('hidden');
       }
 
@@ -1961,20 +1960,20 @@
         c.fill();
         c.stroke();
 
-        // Delicate "Mỹ Linh ♥" nameplate tag on the lower basket front
-        c.fillStyle = 'rgba(255, 250, 249, 0.94)';
+        // Delicate "Công chúa Mỹ Linh ♥" nameplate tag on the lower basket front
+        c.fillStyle = 'rgba(255, 250, 249, 0.95)';
         c.strokeStyle = '#E11D48';
         c.lineWidth = 1.2;
         c.beginPath();
-        c.roundRect(-30, 18, 60, 14, 7);
+        c.roundRect(-52, 18, 104, 15, 7.5);
         c.fill();
         c.stroke();
 
-        c.font = '700 9.5px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        c.font = '700 9px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
         c.fillStyle = '#9F1239';
         c.textAlign = 'center';
         c.textBaseline = 'middle';
-        c.fillText('Mỹ Linh ♥', 0, 25.5);
+        c.fillText('Công chúa Mỹ Linh ♥', 0, 25.5);
 
         c.restore();
       }
@@ -2215,7 +2214,7 @@
           c.textAlign = 'center';
           c.fillStyle = '#E11D48';
           c.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          c.fillText('GỬI TẶNG VỢ YÊU MỸ LINH · 20/10', centerX, 72);
+          c.fillText('GỬI TẶNG VỢ IU MỸ LINH · 20/10', centerX, 72);
 
           c.fillStyle = '#881337';
           c.font = 'italic bold 23px Georgia, serif';
@@ -2224,7 +2223,7 @@
 
           c.fillStyle = '#9F1239';
           c.font = '600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          c.fillText(`Chúc mừng vợ yêu Mỹ Linh!  ·  Điểm số: ${Math.floor(score)}  ·  Love Meter: ${Math.min(100, Math.round(loveMeter))}%`, centerX, 558);
+          c.fillText(`Chúc mừng vợ iu Mỹ Linh!  ·  Điểm số: ${Math.floor(score)}  ·  Love Meter: ${Math.min(100, Math.round(loveMeter))}%`, centerX, 558);
         }
 
         c.restore();
