@@ -550,24 +550,49 @@
         left: 8px;
         right: 8px;
         padding: 8px 10px;
-        gap: 8px;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .hud-group {
+        gap: 10px;
       }
       .hud-value {
-        font-size: 15px;
+        font-size: 14px;
+      }
+      .life-heart {
+        width: 18px;
+        height: 18px;
       }
       .love-meter-wrap {
-        max-width: 140px;
+        order: 3;
+        flex: 1 1 100%;
+        max-width: 100%;
+        margin-top: 2px;
+      }
+      .ingame-welcome-banner {
+        top: 96px;
+        font-size: 12px;
+        padding: 6px 14px;
+        white-space: normal;
+        text-align: center;
+        border-radius: 12px;
+      }
+      .overlay-layer {
+        padding: 12px;
       }
       .item-legend {
         grid-template-columns: 1fr;
-        gap: 8px;
+        gap: 6px;
         padding: 10px;
+        margin-bottom: 14px;
       }
       .modal-card {
-        padding: 20px 18px 18px;
+        padding: 18px 16px 16px;
+        max-height: 92dvh;
+        overflow-y: auto;
       }
       .victory-banner-card {
-        padding: 16px 16px 14px;
+        padding: 14px 14px 12px;
       }
     }
   </style>
@@ -637,7 +662,7 @@
 
       <!-- In-Game Floating Welcome Toast for Mỹ Linh -->
       <div class="ingame-welcome-banner" id="ingameWelcomeBanner" aria-live="polite">
-        Chào mừng Mỹ Linh yêu dấu! Chúc em hái thật nhiều hoa hồng 20/10 nhé! 🌹
+        Chào mừng Mỹ Linh! Khéo léo hứng hoa và né mây mưa nhé! 🌹
       </div>
 
       <!-- Main Game Canvas -->
@@ -647,18 +672,18 @@
       <div class="overlay-layer" id="startOverlay">
         <div class="modal-card">
           <div class="modal-kicker">KỶ NIỆM NGÀY PHỤ NỮ VIỆT NAM 20/10</div>
-          <h1 class="modal-title">Giỏ Hoa Tình Yêu Tặng Mỹ Linh</h1>
+          <h1 class="modal-title">Giỏ Hoa 20/10 Tặng Mỹ Linh</h1>
 
           <!-- Rotating Welcome Messages for Mỹ Linh -->
-          <div class="welcome-greeting-box" id="welcomeGreetingBox" title="Nhấn để xem thêm lời chào dành cho Mỹ Linh">
+          <div class="welcome-greeting-box" id="welcomeGreetingBox" title="Nhấn để xem lời nhắn khác">
             <p class="welcome-greeting-quote" id="welcomeGreetingText">
-              “Chào mừng công chúa Mỹ Linh đến với khu vườn hoa hồng 20/10! Hôm nay mọi đóa hoa đẹp nhất đều nở vì em.”
+              “Chào mừng công chúa Mỹ Linh đến với khu vườn hoa hồng 20/10! Hôm nay cùng thử tài hái hoa giải trí nhé.”
             </p>
-            <div class="welcome-greeting-hint">♥ Nhấn vào đây để xem lời nhắn tiếp theo dành cho Mỹ Linh ♥</div>
+            <div class="welcome-greeting-hint">Nhấn vào đây để xem lời nhắn tiếp theo</div>
           </div>
 
           <p class="modal-subtitle">
-            Mỹ Linh hãy di chuyển giỏ hoa bằng chuột, chạm kéo hoặc phím <strong>← / →</strong> để đón những đóa hồng đỏ thắm và lấp đầy <strong>100% Love Meter</strong> nhé!
+            Di chuyển giỏ hoa bằng chuột, chạm kéo hoặc phím <strong>← / →</strong> để hứng hoa hồng và lấp đầy <strong>100% Love Meter</strong> trong 60 giây nhé!
           </p>
 
           <div class="item-legend">
@@ -666,35 +691,35 @@
               <div class="legend-icon" aria-hidden="true">🌹</div>
               <div class="legend-text">
                 <strong>Hoa Hồng Đỏ</strong>
-                <span>+10 điểm · +2% Love Meter</span>
+                <span>+10 điểm · +1% Love Meter</span>
               </div>
             </div>
             <div class="legend-row">
               <div class="legend-icon" aria-hidden="true">💖</div>
               <div class="legend-text">
                 <strong>Trái Tim Hồng</strong>
-                <span>+20 điểm · +8% Love Meter</span>
+                <span>+20 điểm · +6% Love Meter</span>
               </div>
             </div>
             <div class="legend-row">
               <div class="legend-icon" aria-hidden="true">🎁</div>
               <div class="legend-text">
                 <strong>Hộp Quà Đặc Biệt</strong>
-                <span>Nam châm hút hoa hoặc Nhân đôi 2x (7s)</span>
+                <span>Nam châm hút hoa hoặc Nhân đôi 2x (6s)</span>
               </div>
             </div>
             <div class="legend-row">
               <div class="legend-icon" aria-hidden="true">⛈️</div>
               <div class="legend-text">
                 <strong>Cành Gai / Mây Mưa / Đồng Hồ</strong>
-                <span>Trừ 1 Tim &amp; -15 điểm (Ít xuất hiện, dễ né!)</span>
+                <span>Trừ 1 Tim &amp; -15 điểm (Nhớ khéo léo né nhé!)</span>
               </div>
             </div>
           </div>
 
           <div class="btn-row">
             <button type="button" class="btn-primary" id="startBtn">
-              Cùng Mỹ Linh Hái Hoa · Start Game
+              Bắt Đầu Chơi · Start Game
             </button>
           </div>
         </div>
@@ -703,14 +728,14 @@
       <!-- GAME OVER OVERLAY -->
       <div class="overlay-layer hidden" id="gameOverOverlay">
         <div class="modal-card">
-          <div class="modal-kicker">ĐỪNG BỎ CUỘC NHÉ MỸ LINH ƠI!</div>
-          <h2 class="modal-title">Ôi, Giỏ Hoa Của Mỹ Linh Bị Ướt Mưa Rồi!</h2>
+          <div class="modal-kicker">THỬ LẠI LẦN NỮA NHÉ</div>
+          <h2 class="modal-title">Tiếc Quá, Giỏ Hoa Dính Mưa Rồi!</h2>
           <p class="modal-subtitle" id="gameOverMessage">
-            Đừng buồn nhé Mỹ Linh yêu dấu! Tình yêu dành cho em không bao giờ ngại thử thách — mình cùng chơi lại để kết nên bó hoa 20/10 rực rỡ nhất nhé!
+            Mưa gió với deadline hơi nhiều một chút! Mỹ Linh bấm chơi lại để gom lại giỏ hoa 20/10 nhé.
           </p>
           <div class="btn-row">
             <button type="button" class="btn-primary" id="retryBtn">
-              Mỹ Linh Chơi Lại Nhé · Try Again
+              Chơi Lại · Try Again
             </button>
           </div>
         </div>
@@ -719,12 +744,12 @@
       <!-- VICTORY OVERLAY -->
       <div class="overlay-layer victory-mode hidden" id="victoryOverlay">
         <div class="victory-banner-card">
-          <div class="modal-kicker">DÀNH TẶNG BÀ XÃ MỸ LINH YÊU DẤU · 20/10</div>
+          <div class="modal-kicker">GỬI TẶNG VỢ YÊU MỸ LINH · 20/10</div>
           <blockquote class="victory-quote">
             “Happy Vietnamese Women's Day to my darling wifey! Love you always”
           </blockquote>
           <div class="victory-meta" id="victoryStatsText">
-            Chúc mừng Mỹ Linh! · Điểm số: 0 · Love Meter: 100%
+            Chúc mừng vợ yêu Mỹ Linh! · Điểm số: 0 · Love Meter: 100%
           </div>
           <div class="btn-row">
             <button type="button" class="btn-primary" id="downloadCardBtn">
@@ -1012,19 +1037,19 @@
       const welcomeGreetingText = document.getElementById('welcomeGreetingText');
       const ingameWelcomeBanner = document.getElementById('ingameWelcomeBanner');
 
-      // Personalized Welcome Messages for Mỹ Linh
+      // Start screen messages ("công chúa Mỹ Linh" + natural welcome) & In-game encouragement
       const MY_LINH_WELCOME_MESSAGES = [
-        '“Chào mừng công chúa Mỹ Linh đến với khu vườn hoa hồng 20/10! Hôm nay mọi đóa hoa đẹp nhất đều nở vì em.”',
-        '“Mỹ Linh ơi, chồng đã chuẩn bị cả một bầu trời hoa hồng và trái tim đang rơi xuống — em sẵn sàng đón nhận chưa nào?”',
-        '“Chúc bà xã Mỹ Linh ngày 20/10 luôn xinh đẹp rạng rỡ, tràn ngập tiếng cười và hạnh phúc bên anh nhé!”',
-        '“Mỗi đóa hồng Mỹ Linh hứng được là một lời yêu thương ngọt ngào gửi tặng người vợ tuyệt vời nhất!”',
-        '“Bắt đầu thôi nào Mỹ Linh yêu dấu! Hãy lấp đầy 100% Love Meter để mở bó hoa bất ngờ cuối màn nhé!”'
+        '“Chào mừng công chúa Mỹ Linh đến với khu vườn hoa hồng 20/10! Hôm nay cùng thử tài hái hoa giải trí nhé.”',
+        '“Công chúa Mỹ Linh thử tài hứng hoa xem được bao nhiêu điểm nhé — coi chừng mấy đám mây mưa với đồng hồ nha!”',
+        '“Chúc Mỹ Linh một ngày 20/10 thật nhiều niềm vui, luôn tươi tắn và nhiều năng lượng nhé!”',
+        '“Mẹo nhỏ cho Mỹ Linh: Cứ ưu tiên hứng trái tim hồng với hộp quà là đầy bình 100% nhanh lắm!”',
+        '“Sẵn sàng chưa Mỹ Linh ơi? Gom đủ 100% thanh năng lượng để mở món quà bất ngờ cuối game nhé!”'
       ];
 
       const MY_LINH_INGAME_GREETINGS = [
-        'Chào mừng bà xã Mỹ Linh! Chúc em hái được thật nhiều hoa hồng 20/10 nhé! 🌹💖',
-        'Mỹ Linh yêu dấu ơi, những đóa hoa đẹp nhất hôm nay đều dành riêng cho em! ✨',
-        'Chào mừng công chúa Mỹ Linh vào game! Cùng lấp đầy giỏ hoa tình yêu nào! 💕'
+        'Chào mừng Mỹ Linh! Khéo léo hứng hoa và né mây mưa nhé! 🌹',
+        'Bắt đầu thôi Mỹ Linh ơi, chúc một pha hái hoa thật mượt nha! ✨',
+        'Cố lên Mỹ Linh! Nhớ nhặt hộp quà để lấy nam châm hút hoa nhé! 🎁'
       ];
 
       let currentWelcomeIdx = 0;
@@ -1069,9 +1094,10 @@
         }, durationMs);
       }
 
-      // Logical canvas dimensions
-      const W = 800;
-      const H = 600;
+      // Logical canvas dimensions (dynamically synced to prevent mobile stretching/distortion)
+      const gameFrame = document.getElementById('gameFrame');
+      let W = 800;
+      let H = 600;
 
       // ==========================================
       // 3. GAME STATE MACHINE & VARIABLES
@@ -1100,12 +1126,33 @@
         x: W / 2,
         targetX: W / 2,
         y: H - 68,
-        width: 128,
+        width: 116,
         height: 64,
         vx: 0,
         tilt: 0,
         hitFlash: 0
       };
+
+      function resizeCanvas() {
+        const rect = gameFrame.getBoundingClientRect();
+        const newW = Math.max(300, Math.round(rect.width));
+        const newH = Math.max(400, Math.round(rect.height));
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        W = newW;
+        H = newH;
+        canvas.width = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        player.y = H - (W < 600 ? 76 : 68);
+        player.x = Math.max(player.width * 0.55, Math.min(W - player.width * 0.55, player.x));
+        player.targetX = Math.max(player.width * 0.55, Math.min(W - player.width * 0.55, player.targetX));
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+      window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 100));
+      resizeCanvas();
 
       const keys = {
         left: false,
@@ -1255,10 +1302,10 @@
         if (currentState === STATE.PLAYING) {
           if (!milestone50Shown && clampedLove >= 50 && clampedLove < 80) {
             milestone50Shown = true;
-            showIngameToast('Tuyệt quá Mỹ Linh ơi! Giỏ hoa tình yêu đã đầy một nửa rồi! 💕', 3500);
+            showIngameToast('Giỏi quá Mỹ Linh ơi, được nửa chặng đường rồi! 👍', 3200);
           } else if (!milestone80Shown && clampedLove >= 80 && clampedLove < 100) {
             milestone80Shown = true;
-            showIngameToast('Sắp tròn 100% Love Meter rồi bà xã Mỹ Linh yêu dấu ơi! ✨', 3500);
+            showIngameToast('Sắp đầy 100% rồi Mỹ Linh, cố thêm chút nữa thôi! ✨', 3200);
           }
         }
 
@@ -1329,7 +1376,7 @@
 
         const displayLove = Math.min(100, Math.round(loveMeter));
         victoryStatsText.textContent =
-          `Chúc mừng Mỹ Linh! · Điểm số: ${Math.floor(score)} · Love Meter: ${displayLove}% · Hoa & Tim đã gom: ${rosesCaught + heartsCaught}`;
+          `Chúc mừng vợ yêu Mỹ Linh! · Điểm số: ${Math.floor(score)} · Love Meter: ${displayLove}% · Hoa & Tim đã gom: ${rosesCaught + heartsCaught}`;
         victoryOverlay.classList.remove('hidden');
       }
 
@@ -1349,23 +1396,23 @@
       // 6. SPAWNING & PARTICLE HELPERS
       // ==========================================
       function spawnItem() {
-        const margin = 56;
+        const margin = Math.min(48, W * 0.1);
         const x = margin + Math.random() * (W - margin * 2);
         const roll = Math.random();
 
-        // Easier, more generous probabilities:
-        // 44% Red Rose
-        // 34% Pink Heart
-        // 10% Special Gift Box
-        // 12% Hazard (Thorn branch, Rain cloud, or Deadline clock)
+        // Balanced probabilities (slightly more challenging):
+        // 42% Red Rose
+        // 30% Pink Heart
+        // 8% Special Gift Box
+        // 20% Hazard (Thorn branch, Rain cloud, or Deadline clock)
         let type = 'ROSE';
         let hazardSubtype = 'THORN';
 
-        if (roll < 0.44) {
+        if (roll < 0.42) {
           type = 'ROSE';
-        } else if (roll < 0.78) {
+        } else if (roll < 0.72) {
           type = 'HEART';
-        } else if (roll < 0.88) {
+        } else if (roll < 0.80) {
           type = 'GIFT';
         } else {
           type = 'HAZARD';
@@ -1373,20 +1420,20 @@
           hazardSubtype = hRoll < 0.34 ? 'THORN' : hRoll < 0.67 ? 'CLOUD' : 'CLOCK';
         }
 
-        const speedScale = 1 + (60 - timeLeft) * 0.002;
-        let vy = (105 + Math.random() * 60) * speedScale;
-        if (type === 'GIFT') vy = 128 * speedScale;
+        const speedScale = 1 + (60 - timeLeft) * 0.004;
+        let vy = (132 + Math.random() * 78) * speedScale;
+        if (type === 'GIFT') vy = 158 * speedScale;
 
         fallingItems.push({
           x,
           y: -36,
-          vx: (Math.random() - 0.5) * 18,
+          vx: (Math.random() - 0.5) * 24,
           vy,
           radius: type === 'GIFT' ? 24 : 22,
           type,
           hazardSubtype,
           angle: (Math.random() - 0.5) * 0.4,
-          spin: (Math.random() - 0.5) * 1.4,
+          spin: (Math.random() - 0.5) * 1.5,
           swayPhase: Math.random() * Math.PI * 2,
           magnetized: false
         });
@@ -2000,12 +2047,19 @@
       }
 
       // Draw the Blooming Bouquet Celebration on Canvas (used for both Victory state & PNG Card Export)
-      function drawVictoryBouquetScene(c, animProgress, includeCardText = false) {
-        const centerX = W / 2;
-        const basketY = includeCardText ? 425 : 345;
+      function drawVictoryBouquetScene(c, animProgress, includeCardText = false, sceneW = W, sceneH = H) {
+        const centerX = sceneW / 2;
+        const bouquetScale = includeCardText ? 1 : Math.min(1, sceneW / 430);
+        const basketY = includeCardText
+          ? 425
+          : Math.min(sceneH - 210, Math.max(240, sceneH * 0.55));
+
+        c.save();
+        c.translate(centerX, basketY);
+        c.scale(bouquetScale, bouquetScale);
+        c.translate(-centerX, -basketY);
 
         // Soft golden-rose radiant backdrop glow behind the bouquet
-        c.save();
         const glow = c.createRadialGradient(centerX, basketY - 95, 20, centerX, basketY - 95, 270);
         glow.addColorStop(0, 'rgba(254, 240, 138, 0.78)');
         glow.addColorStop(0.5, 'rgba(251, 113, 133, 0.28)');
@@ -2126,8 +2180,10 @@
         c.fill();
         c.stroke();
         c.restore();
+        c.restore();
 
         // Floating glowing particle hearts
+        c.save();
         victoryHearts.forEach((h) => {
           c.save();
           c.globalAlpha = h.alpha;
@@ -2142,24 +2198,24 @@
           // Outer golden-rose frame
           c.strokeStyle = '#D97706';
           c.lineWidth = 4;
-          c.strokeRect(18, 18, W - 36, H - 36);
+          c.strokeRect(18, 18, sceneW - 36, sceneH - 36);
           c.strokeStyle = 'rgba(225, 29, 72, 0.35)';
           c.lineWidth = 1.5;
-          c.strokeRect(26, 26, W - 52, H - 52);
+          c.strokeRect(26, 26, sceneW - 52, sceneH - 52);
 
           // Top Greeting Banner Ribbon
           c.fillStyle = 'rgba(255, 250, 250, 0.94)';
           c.strokeStyle = 'rgba(217, 119, 6, 0.55)';
           c.lineWidth = 2;
           c.beginPath();
-          c.roundRect(70, 42, W - 140, 132, 18);
+          c.roundRect(70, 42, sceneW - 140, 132, 18);
           c.fill();
           c.stroke();
 
           c.textAlign = 'center';
           c.fillStyle = '#E11D48';
           c.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          c.fillText('DÀNH TẶNG BÀ XÃ MỸ LINH YÊU DẤU · 20/10', centerX, 72);
+          c.fillText('GỬI TẶNG VỢ YÊU MỸ LINH · 20/10', centerX, 72);
 
           c.fillStyle = '#881337';
           c.font = 'italic bold 23px Georgia, serif';
@@ -2168,7 +2224,7 @@
 
           c.fillStyle = '#9F1239';
           c.font = '600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-          c.fillText(`Chúc mừng Mỹ Linh!  ·  Điểm số: ${Math.floor(score)}  ·  Love Meter: ${Math.min(100, Math.round(loveMeter))}%  ·  Love you always ♥`, centerX, 558);
+          c.fillText(`Chúc mừng vợ yêu Mỹ Linh!  ·  Điểm số: ${Math.floor(score)}  ·  Love Meter: ${Math.min(100, Math.round(loveMeter))}%`, centerX, 558);
         }
 
         c.restore();
@@ -2179,18 +2235,26 @@
       // ==========================================
       downloadCardBtn.addEventListener('click', () => {
         audio.playHeartHarp();
+        const cardW = 800;
+        const cardH = 600;
         const exportCanvas = document.createElement('canvas');
-        exportCanvas.width = W;
-        exportCanvas.height = H;
+        exportCanvas.width = cardW;
+        exportCanvas.height = cardH;
         const exCtx = exportCanvas.getContext('2d');
 
-        // Render background + full bloomed bouquet + greeting card banner
+        // Temporarily render at standard 800x600 postcard resolution
+        const prevW = W;
+        const prevH = H;
+        W = cardW;
+        H = cardH;
         drawRomanticBackground(exCtx, 0, performance.now() * 0.001);
-        drawVictoryBouquetScene(exCtx, 1.5, true);
+        drawVictoryBouquetScene(exCtx, 1.5, true, cardW, cardH);
+        W = prevW;
+        H = prevH;
 
         const dataUrl = exportCanvas.toDataURL('image/png');
         const link = document.createElement('a');
-        link.download = 'thiep-20-10-darling-wifey.png';
+        link.download = 'thiep-20-10-my-linh.png';
         link.href = dataUrl;
         document.body.appendChild(link);
         link.click();
@@ -2254,9 +2318,9 @@
           spawnCooldown -= dt;
           if (spawnCooldown <= 0) {
             spawnItem();
-            // Gentle, relaxed spawn pacing
+            // Balanced spawn pacing
             const progress = (60 - timeLeft) / 60;
-            spawnCooldown = Math.max(0.42, 0.74 - progress * 0.18 + (Math.random() - 0.5) * 0.16);
+            spawnCooldown = Math.max(0.34, 0.66 - progress * 0.22 + (Math.random() - 0.5) * 0.16);
           }
 
           // Update falling items
@@ -2268,9 +2332,9 @@
               const dx = player.x - item.x;
               const dy = (player.y - 10) - item.y;
               const dist = Math.hypot(dx, dy);
-              if (dist < 320) {
+              if (dist < 290) {
                 item.magnetized = true;
-                const pullStrength = 600;
+                const pullStrength = 560;
                 item.x += (dx / Math.max(1, dist)) * pullStrength * dt;
                 item.y += (dy / Math.max(1, dist)) * pullStrength * dt;
                 audio.playBuffPulse(true);
@@ -2292,7 +2356,7 @@
 
             if (!item.magnetized) {
               item.y += item.vy * dt;
-              item.x += (item.vx + Math.sin(timeSec * 2.5 + item.swayPhase) * 15) * dt;
+              item.x += (item.vx + Math.sin(timeSec * 2.8 + item.swayPhase) * 19) * dt;
             }
             item.angle += item.spin * dt;
 
@@ -2310,24 +2374,24 @@
               drawProceduralHazard(ctx, item, timeSec);
             }
 
-            // Check collision with Player Basket hitbox (generous for flowers/hearts, forgiving for hazards)
+            // Check collision with Player Basket hitbox
             const isGoodItem = item.type !== 'HAZARD';
-            const hitboxHalfW = isGoodItem ? player.width * 0.54 : player.width * 0.28;
-            const hitboxHalfH = isGoodItem ? 36 : 22;
+            const hitboxHalfW = isGoodItem ? player.width * 0.50 : player.width * 0.36;
+            const hitboxHalfH = isGoodItem ? 34 : 26;
             const dx = Math.abs(item.x - player.x);
             const dy = Math.abs(item.y - (player.y - 6));
 
-            if (dx < hitboxHalfW + item.radius * (isGoodItem ? 0.72 : 0.35) && dy < hitboxHalfH + item.radius * 0.45) {
+            if (dx < hitboxHalfW + item.radius * (isGoodItem ? 0.68 : 0.45) && dy < hitboxHalfH + item.radius * 0.48) {
               const mult = activeBuff === 'MULTIPLIER' ? 2 : 1;
 
               if (item.type === 'ROSE') {
                 const pts = 10 * mult;
                 score += pts;
                 rosesCaught++;
-                loveMeter = Math.min(100, loveMeter + 2);
+                loveMeter = Math.min(100, loveMeter + 1);
                 audio.playRoseChime();
                 if (mult > 1) audio.playBuffPulse(false);
-                addFloatingText(item.x, item.y - 12, `+${pts} · +2% ♥`, '#E11D48', mult > 1 ? 1.2 : 1);
+                addFloatingText(item.x, item.y - 12, `+${pts} · +1% ♥`, '#E11D48', mult > 1 ? 1.2 : 1);
                 spawnBurst(item.x, item.y, '#F43F5E', 12, false);
 
                 if (loveMeter >= 100) {
@@ -2339,9 +2403,9 @@
                 const pts = 20 * mult;
                 score += pts;
                 heartsCaught++;
-                loveMeter = Math.min(100, loveMeter + 8);
+                loveMeter = Math.min(100, loveMeter + 6);
                 audio.playHeartHarp();
-                addFloatingText(item.x, item.y - 12, `+${pts} · +8% ♥`, '#EC4899', 1.15);
+                addFloatingText(item.x, item.y - 12, `+${pts} · +6% ♥`, '#EC4899', 1.15);
                 spawnBurst(item.x, item.y, '#FB7185', 16, true);
 
                 if (loveMeter >= 100) {
@@ -2352,9 +2416,9 @@
               } else if (item.type === 'GIFT') {
                 audio.playGiftFanfare();
                 activeBuff = Math.random() < 0.5 ? 'MAGNET' : 'MULTIPLIER';
-                buffTimeRemaining = 7.0;
-                loveMeter = Math.min(100, loveMeter + 5);
-                const buffText = activeBuff === 'MAGNET' ? '🎁 NAM CHÂM HÚT HOA (7s)!' : '🎁 NHÂN ĐÔI 2X ĐIỂM (7s)!';
+                buffTimeRemaining = 6.0;
+                loveMeter = Math.min(100, loveMeter + 3);
+                const buffText = activeBuff === 'MAGNET' ? '🎁 NAM CHÂM HÚT HOA (6s)!' : '🎁 NHÂN ĐÔI 2X ĐIỂM (6s)!';
                 addFloatingText(item.x, item.y - 18, buffText, '#D97706', 1.25);
                 spawnBurst(item.x, item.y, '#FBBF24', 22, true);
 
@@ -2364,11 +2428,10 @@
                   break;
                 }
               } else if (item.type === 'HAZARD') {
-                // Brief invulnerability grace period after taking a hit
                 if (player.hitFlash <= 0) {
                   lives = Math.max(0, lives - 1);
                   score = Math.max(0, score - 15);
-                  player.hitFlash = 1.1;
+                  player.hitFlash = 0.75;
                   audio.playHazardThud();
                   addFloatingText(item.x, item.y - 14, '-1 Tim · -15', '#881337', 1.15);
                   spawnBurst(item.x, item.y, '#64748B', 14, false);
