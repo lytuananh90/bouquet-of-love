@@ -1,0 +1,2471 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Bouquet of Love — 20/10 Arcade Game</title>
+  <meta name="description" content="A romantic 2D HTML5 Canvas arcade catching game celebrating Vietnamese Women's Day (October 20th) with procedural floral visuals, Web Audio synthesized music, and a downloadable greeting card." />
+  <meta property="og:title" content="Bouquet of Love — 20/10 Arcade Game" />
+  <meta property="og:description" content="A romantic 2D HTML5 Canvas arcade catching game celebrating Vietnamese Women's Day (October 20th) with procedural floral visuals, Web Audio synthesized music, and a downloadable greeting card." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <style>
+    :root {
+      --bg-cream: #FFF8F6;
+      --bg-blush: #FFE5EC;
+      --bg-rose-soft: #FFC2D1;
+      --rose-primary: #E11D48;
+      --rose-deep: #9F1239;
+      --pink-accent: #FB7185;
+      --gold-warm: #D97706;
+      --gold-light: #FDE68A;
+      --text-dark: #4C0519;
+      --text-muted: #881337;
+      --card-surface: rgba(255, 250, 249, 0.94);
+      --border-delicate: rgba(225, 29, 72, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 20%, #FFF9F8 0%, #FFE6EE 55%, #FFD2E0 100%);
+      font-family: 'Georgia', 'Palatino Linotype', 'Book Antiqua', serif;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Outer responsive shell: 800x600 fixed-ratio wrapper on desktop, full height on mobile */
+    .stage-shell {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+       flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .game-frame {
+      position: relative;
+      width: min(800px, 100%);
+      aspect-ratio: 4 / 3;
+      max-height: calc(100vh - 32px);
+      background: linear-gradient(180deg, #FFFDFC 0%, #FFF0F5 62%, #FFE0EA 100%);
+      border-radius: 22px;
+      border: 2px solid rgba(225, 29, 72, 0.22);
+      box-shadow:
+        0 24px 60px rgba(159, 18, 57, 0.16),
+        0 4px 16px rgba(225, 29, 72, 0.08),
+        inset 0 0 0 4px rgba(255, 255, 255, 0.75);
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    @media (max-width: 768px) {
+      .stage-shell {
+        padding: 0;
+      }
+      .game-frame {
+        width: 100vw;
+        height: 100dvh;
+        max-height: 100dvh;
+        aspect-ratio: auto;
+        border-radius: 0;
+        border: none;
+      }
+    }
+
+    canvas#gameCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    canvas#gameCanvas:active {
+      cursor: grabbing;
+    }
+
+    /* Top HUD Bar */
+    .hud-bar {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      right: 14px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 16px;
+      background: rgba(255, 252, 252, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(225, 29, 72, 0.16);
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(159, 18, 57, 0.08);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      pointer-events: auto;
+    }
+
+    .hud-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .hud-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .hud-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .hud-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-dark);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .buff-indicator {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: #FEF3C7;
+      color: #B45309;
+      border: 1px solid #F59E0B;
+      display: none;
+      white-space: nowrap;
+    }
+
+    .buff-indicator.active {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Lives Hearts */
+    .lives-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .life-heart {
+      width: 22px;
+      height: 22px;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+    }
+
+    .life-heart.lost {
+      opacity: 0.22;
+      transform: scale(0.8);
+      filter: grayscale(1);
+    }
+
+    /* Love Meter Centerpiece */
+    .love-meter-wrap {
+      flex: 1;
+      max-width: 280px;
+      min-width: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .love-meter-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .love-meter-title {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .beating-heart-icon {
+      display: inline-block;
+      color: var(--rose-primary);
+      animation: pulseHeart 1.1s infinite ease-in-out;
+      transform-origin: center;
+    }
+
+    @keyframes pulseHeart {
+      0%, 100% { transform: scale(1); }
+      35% { transform: scale(1.24); }
+      60% { transform: scale(0.96); }
+    }
+
+    .love-meter-track {
+      position: relative;
+      width: 100%;
+      height: 12px;
+      background: #FFE4E6;
+      border-radius: 999px;
+      border: 1px solid rgba(225, 29, 72, 0.22);
+      overflow: hidden;
+    }
+
+    .love-meter-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #FB7185 0%, #E11D48 60%, #F59E0B 100%);
+      border-radius: 999px;
+      transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .love-meter-fill::after {
+      content: '';
+      position: absolute;
+      top: 1px;
+      left: 4px;
+      right: 4px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.45);
+      border-radius: 999px;
+    }
+
+    .sound-btn {
+      appearance: none;
+      border: 1px solid rgba(225, 29, 72, 0.2);
+      background: #FFF5F7;
+      color: var(--text-dark);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .sound-btn:hover {
+      background: #FFE4EA;
+      transform: translateY(-1px);
+    }
+
+    .sound-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Overlay Screens (START, GAME_OVER, VICTORY) */
+    .overlay-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(76, 5, 25, 0.18);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      opacity: 1;
+      transition: opacity 0.25s ease;
+    }
+
+    .overlay-layer.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Victory screen keeps top bouquet visible */
+    .overlay-layer.victory-mode {
+      background: linear-gradient(180deg, rgba(76, 5, 25, 0.08) 0%, rgba(76, 5, 25, 0.26) 100%);
+      backdrop-filter: blur(1.5px);
+      -webkit-backdrop-filter: blur(1.5px);
+      align-items: flex-end;
+      padding-bottom: 22px;
+    }
+
+    .modal-card {
+      width: min(520px, 100%);
+      background: var(--card-surface);
+      border: 1.5px solid rgba(225, 29, 72, 0.24);
+      border-radius: 20px;
+      padding: 28px 28px 24px;
+      box-shadow:
+        0 20px 50px rgba(136, 19, 55, 0.2),
+        inset 0 0 0 3px rgba(255, 255, 255, 0.85);
+      text-align: center;
+      position: relative;
+    }
+
+    .modal-kicker {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--rose-primary);
+      margin-bottom: 6px;
+    }
+
+    .modal-title {
+      font-size: clamp(24px, 4vw, 34px);
+      font-weight: 700;
+      color: var(--text-dark);
+      line-height: 1.2;
+      margin-bottom: 10px;
+      text-wrap: balance;
+    }
+
+    .modal-subtitle {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    /* Welcome Greeting Box for Mỹ Linh */
+    .welcome-greeting-box {
+      position: relative;
+      background: linear-gradient(135deg, #FFF0F3 0%, #FFE4E9 100%);
+      border: 1.5px solid rgba(225, 29, 72, 0.26);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      box-shadow: 0 6px 18px rgba(225, 29, 72, 0.08);
+    }
+
+    .welcome-greeting-box:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(225, 29, 72, 0.14);
+    }
+
+    .welcome-greeting-quote {
+      font-family: 'Georgia', 'Palatino Linotype', serif;
+      font-size: 14.5px;
+      font-style: italic;
+      font-weight: 700;
+      color: #9F1239;
+      line-height: 1.45;
+      margin-bottom: 4px;
+      transition: opacity 0.2s ease;
+    }
+
+    .welcome-greeting-hint {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #E11D48;
+      opacity: 0.85;
+    }
+
+    /* In-game floating welcome banner for Mỹ Linh */
+    .ingame-welcome-banner {
+      position: absolute;
+      top: 74px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      z-index: 15;
+      background: rgba(255, 250, 251, 0.94);
+      border: 1.5px solid rgba(225, 29, 72, 0.3);
+      border-radius: 999px;
+      padding: 8px 20px;
+      box-shadow: 0 10px 26px rgba(159, 18, 57, 0.14);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #9F1239;
+      white-space: nowrap;
+      max-width: 92%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .ingame-welcome-banner.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Legend grid in Start Modal */
+    .item-legend {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      text-align: left;
+      margin-bottom: 20px;
+      padding: 14px;
+      background: rgba(255, 240, 244, 0.72);
+      border-radius: 12px;
+      border: 1px solid rgba(225, 29, 72, 0.12);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12.5px;
+      color: var(--text-dark);
+    }
+
+    .legend-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: #FFFFFF;
+      border: 1px solid rgba(225, 29, 72, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .legend-text strong {
+      display: block;
+      font-size: 12.5px;
+      color: var(--text-dark);
+    }
+
+    .legend-text span {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Greeting Banner in Victory Mode */
+    .victory-banner-card {
+      width: min(620px, 100%);
+      background: rgba(255, 251, 250, 0.93);
+      border: 2px solid rgba(217, 119, 6, 0.42);
+      border-radius: 20px;
+      padding: 20px 24px 18px;
+      box-shadow:
+        0 18px 45px rgba(136, 19, 55, 0.24),
+        inset 0 0 0 3px rgba(255, 255, 255, 0.9);
+      text-align: center;
+    }
+
+    .victory-quote {
+      font-family: 'Georgia', 'Palatino Linotype', serif;
+      font-size: clamp(19px, 3.2vw, 26px);
+      font-style: italic;
+      font-weight: 700;
+      color: #881337;
+      line-height: 1.35;
+      margin: 6px 0 10px;
+      text-wrap: balance;
+    }
+
+    .victory-meta {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .btn-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .btn-primary, .btn-secondary {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.16s ease, background-color 0.16s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
+      color: #FFFFFF;
+      box-shadow: 0 8px 20px rgba(225, 29, 72, 0.32);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(225, 29, 72, 0.4);
+    }
+
+    .btn-secondary {
+      background: #FFF1F2;
+      color: #9F1239;
+      border: 1.5px solid rgba(225, 29, 72, 0.28);
+    }
+
+    .btn-secondary:hover {
+      background: #FFE4E6;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 600px) {
+      .hud-bar {
+        top: 8px;
+        left: 8px;
+        right: 8px;
+        padding: 8px 10px;
+        gap: 8px;
+      }
+      .hud-value {
+        font-size: 15px;
+      }
+      .love-meter-wrap {
+        max-width: 140px;
+      }
+      .item-legend {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 10px;
+      }
+      .modal-card {
+        padding: 20px 18px 18px;
+      }
+      .victory-banner-card {
+        padding: 16px 16px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage-shell">
+    <div class="game-frame" id="gameFrame">
+      <!-- Top HUD -->
+      <header class="hud-bar" aria-label="Game Status">
+        <div class="hud-group">
+          <div class="hud-stat">
+            <span class="hud-label">Điểm Số · Score</span>
+            <div class="hud-value">
+              <span id="scoreDisplay">0</span>
+              <span id="buffBadge" class="buff-indicator">2x</span>
+            </div>
+          </div>
+          <div class="hud-stat">
+            <span class="hud-label">Tim · Lives</span>
+            <div class="lives-row" id="livesContainer" aria-label="3 Lives">
+              <svg class="life-heart" viewBox="0 0 24 24" fill="#E11D48">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+              <svg class="life-heart" viewBox="0 0 24 24" fill="#E11D48">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+              <svg class="life-heart" viewBox="0 0 24 24" fill="#E11D48">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Love Meter -->
+        <div class="love-meter-wrap">
+          <div class="love-meter-header">
+            <span class="love-meter-title">
+              <span class="beating-heart-icon" aria-hidden="true">♥</span>
+              <span>Love Meter</span>
+            </span>
+            <span id="loveMeterPercent">0%</span>
+          </div>
+          <div class="love-meter-track">
+            <div class="love-meter-fill" id="loveMeterFill"></div>
+          </div>
+        </div>
+
+        <div class="hud-group">
+          <div class="hud-stat">
+            <span class="hud-label">Thời Gian · Time</span>
+            <div class="hud-value"><span id="timerDisplay">60</span>s</div>
+          </div>
+          <button type="button" class="sound-btn" id="soundToggleBtn" title="Bật / Tắt Âm Thanh" aria-label="Toggle Sound">
+            <svg id="soundIconOn" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+            <svg id="soundIconOff" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <line x1="23" y1="9" x2="17" y2="15"></line>
+              <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- In-Game Floating Welcome Toast for Mỹ Linh -->
+      <div class="ingame-welcome-banner" id="ingameWelcomeBanner" aria-live="polite">
+        Chào mừng Mỹ Linh yêu dấu! Chúc em hái thật nhiều hoa hồng 20/10 nhé! 🌹
+      </div>
+
+      <!-- Main Game Canvas -->
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+      <!-- START OVERLAY -->
+      <div class="overlay-layer" id="startOverlay">
+        <div class="modal-card">
+          <div class="modal-kicker">KỶ NIỆM NGÀY PHỤ NỮ VIỆT NAM 20/10</div>
+          <h1 class="modal-title">Giỏ Hoa Tình Yêu Tặng Mỹ Linh</h1>
+
+          <!-- Rotating Welcome Messages for Mỹ Linh -->
+          <div class="welcome-greeting-box" id="welcomeGreetingBox" title="Nhấn để xem thêm lời chào dành cho Mỹ Linh">
+            <p class="welcome-greeting-quote" id="welcomeGreetingText">
+              “Chào mừng công chúa Mỹ Linh đến với khu vườn hoa hồng 20/10! Hôm nay mọi đóa hoa đẹp nhất đều nở vì em.”
+            </p>
+            <div class="welcome-greeting-hint">♥ Nhấn vào đây để xem lời nhắn tiếp theo dành cho Mỹ Linh ♥</div>
+          </div>
+
+          <p class="modal-subtitle">
+            Mỹ Linh hãy di chuyển giỏ hoa bằng chuột, chạm kéo hoặc phím <strong>← / →</strong> để đón những đóa hồng đỏ thắm và lấp đầy <strong>100% Love Meter</strong> nhé!
+          </p>
+
+          <div class="item-legend">
+            <div class="legend-row">
+              <div class="legend-icon" aria-hidden="true">🌹</div>
+              <div class="legend-text">
+                <strong>Hoa Hồng Đỏ</strong>
+                <span>+10 điểm · +2% Love Meter</span>
+              </div>
+            </div>
+            <div class="legend-row">
+              <div class="legend-icon" aria-hidden="true">💖</div>
+              <div class="legend-text">
+                <strong>Trái Tim Hồng</strong>
+                <span>+20 điểm · +8% Love Meter</span>
+              </div>
+            </div>
+            <div class="legend-row">
+              <div class="legend-icon" aria-hidden="true">🎁</div>
+              <div class="legend-text">
+                <strong>Hộp Quà Đặc Biệt</strong>
+                <span>Nam châm hút hoa hoặc Nhân đôi 2x (7s)</span>
+              </div>
+            </div>
+            <div class="legend-row">
+              <div class="legend-icon" aria-hidden="true">⛈️</div>
+              <div class="legend-text">
+                <strong>Cành Gai / Mây Mưa / Đồng Hồ</strong>
+                <span>Trừ 1 Tim &amp; -15 điểm (Ít xuất hiện, dễ né!)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button type="button" class="btn-primary" id="startBtn">
+              Cùng Mỹ Linh Hái Hoa · Start Game
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GAME OVER OVERLAY -->
+      <div class="overlay-layer hidden" id="gameOverOverlay">
+        <div class="modal-card">
+          <div class="modal-kicker">ĐỪNG BỎ CUỘC NHÉ MỸ LINH ƠI!</div>
+          <h2 class="modal-title">Ôi, Giỏ Hoa Của Mỹ Linh Bị Ướt Mưa Rồi!</h2>
+          <p class="modal-subtitle" id="gameOverMessage">
+            Đừng buồn nhé Mỹ Linh yêu dấu! Tình yêu dành cho em không bao giờ ngại thử thách — mình cùng chơi lại để kết nên bó hoa 20/10 rực rỡ nhất nhé!
+          </p>
+          <div class="btn-row">
+            <button type="button" class="btn-primary" id="retryBtn">
+              Mỹ Linh Chơi Lại Nhé · Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VICTORY OVERLAY -->
+      <div class="overlay-layer victory-mode hidden" id="victoryOverlay">
+        <div class="victory-banner-card">
+          <div class="modal-kicker">DÀNH TẶNG BÀ XÃ MỸ LINH YÊU DẤU · 20/10</div>
+          <blockquote class="victory-quote">
+            “Happy Vietnamese Women's Day to my darling wifey! Love you always”
+          </blockquote>
+          <div class="victory-meta" id="victoryStatsText">
+            Chúc mừng Mỹ Linh! · Điểm số: 0 · Love Meter: 100%
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn-primary" id="downloadCardBtn">
+              Lưu Thiệp Chúc Mừng
+            </button>
+            <button type="button" class="btn-secondary" id="replayVictoryBtn">
+              Chơi Lại
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ==========================================
+      // 1. WEB AUDIO SYNTHESIZER (NO EXTERNAL FILES)
+      // ==========================================
+      class RomanticSynthAudio {
+        constructor() {
+          this.ctx = null;
+          this.muted = false;
+          this.lastMagnetPulse = 0;
+        }
+
+        init() {
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+              this.ctx = new AudioCtx();
+            }
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+          }
+        }
+
+        toggleMute() {
+          this.muted = !this.muted;
+          return this.muted;
+        }
+
+        // Soft chime/bell when catching a Red Rose
+        playRoseChime() {
+          if (this.muted) return;
+          this.init();
+          if (!this.ctx) return;
+
+          const now = this.ctx.currentTime;
+          const freqs = [880, 1318.5, 1760]; // A5, E6, A6 warm bell harmonics
+          freqs.forEach((f, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = idx === 0 ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(f, now);
+
+            const startGain = 0.14 / (idx + 1);
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.exponentialRampToValueAtTime(startGain, now + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55 - idx * 0.1);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.6);
+          });
+        }
+
+        // Sparkling harp arpeggio when catching a Pink Heart
+        playHeartHarp() {
+          if (this.muted) return;
+          this.init();
+          if (!this.ctx) return;
+
+          const now = this.ctx.currentTime;
+          // F major 9th sparkling harp glissando
+          const notes = [587.33, 659.25, 783.99, 987.77, 1174.66, 1567.98];
+          notes.forEach((freq, i) => {
+            const start = now + i * 0.045;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, start);
+
+            gain.gain.setValueAtTime(0.001, start);
+            gain.gain.linearRampToValueAtTime(0.12, start + 0.012);
+            gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.55);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(start);
+            osc.stop(start + 0.6);
+          });
+        }
+
+        // Upbeat fanfare when catching a Special Gift Box
+        playGiftFanfare() {
+          if (this.muted) return;
+          this.init();
+          if (!this.ctx) return;
+
+          const now = this.ctx.currentTime;
+          const fanfare = [
+            { f: 523.25, t: 0.0, d: 0.12 },   // C5
+            { f: 659.25, t: 0.10, d: 0.12 },  // E5
+            { f: 783.99, t: 0.20, d: 0.14 },  // G5
+            { f: 1046.50, t: 0.32, d: 0.48 }  // C6
+          ];
+          fanfare.forEach((n) => {
+            const osc = this.ctx.createOscillator();
+            const osc2 = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'triangle';
+            osc2.type = 'sine';
+            osc.frequency.setValueAtTime(n.f, now + n.t);
+            osc2.frequency.setValueAtTime(n.f * 1.5, now + n.t);
+
+            gain.gain.setValueAtTime(0.001, now + n.t);
+            gain.gain.linearRampToValueAtTime(0.15, now + n.t + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d);
+
+            osc.connect(gain);
+            osc2.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(now + n.t);
+            osc2.start(now + n.t);
+            osc.stop(now + n.t + n.d + 0.05);
+            osc2.stop(now + n.t + n.d + 0.05);
+          });
+        }
+
+        // Dull thud or low buzzer sound when hitting hazard
+        playHazardThud() {
+          if (this.muted) return;
+          this.init();
+          if (!this.ctx) return;
+
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const oscSub = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(165, now);
+          osc.frequency.exponentialRampToValueAtTime(58, now + 0.32);
+
+          oscSub.type = 'triangle';
+          oscSub.frequency.setValueAtTime(110, now);
+          oscSub.frequency.exponentialRampToValueAtTime(42, now + 0.35);
+
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.18, now + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.36);
+
+          osc.connect(gain);
+          oscSub.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          oscSub.start(now);
+          osc.stop(now + 0.38);
+          oscSub.stop(now + 0.38);
+        }
+
+        // Subtle pulse for magnet attraction or multiplier tick
+        playBuffPulse(isMagnet) {
+          if (this.muted) return;
+          this.init();
+          if (!this.ctx) return;
+
+          const now = this.ctx.currentTime;
+          if (now - this.lastMagnetPulse < 0.14) return;
+          this.lastMagnetPulse = now;
+
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          const baseFreq = isMagnet ? 660 : 880;
+          osc.frequency.setValueAtTime(baseFreq, now);
+          osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.25, now + 0.09);
+
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.05, now + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        }
+
+        // Sweet romantic musical jingle on Victory
+        playVictoryJingle() {
+          if (this.muted) return;
+          this.init();
+          if (!this.ctx) return;
+
+          const now = this.ctx.currentTime;
+          // Romantic melody in F Major
+          const melody = [
+            { f: 523.25, t: 0.00, d: 0.25 }, // C5
+            { f: 659.25, t: 0.22, d: 0.25 }, // E5
+            { f: 698.46, t: 0.44, d: 0.35 }, // F5
+            { f: 880.00, t: 0.78, d: 0.35 }, // A5
+            { f: 783.99, t: 1.12, d: 0.25 }, // G5
+            { f: 698.46, t: 1.36, d: 0.25 }, // F5
+            { f: 880.00, t: 1.60, d: 0.32 }, // A5
+            { f: 1046.50, t: 1.92, d: 0.85 } // C6
+          ];
+
+          const chords = [
+            { freqs: [349.23, 440.00, 523.25], t: 0.00, d: 0.8 },  // F maj
+            { freqs: [392.00, 493.88, 587.33], t: 0.85, d: 0.8 },  // G maj
+            { freqs: [349.23, 440.00, 523.25, 698.46], t: 1.70, d: 1.2 } // F maj7/C
+          ];
+
+          melody.forEach((n) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(n.f, now + n.t);
+
+            gain.gain.setValueAtTime(0.001, now + n.t);
+            gain.gain.linearRampToValueAtTime(0.14, now + n.t + 0.025);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + n.t);
+            osc.stop(now + n.t + n.d + 0.05);
+          });
+
+          chords.forEach((c) => {
+            c.freqs.forEach((freq) => {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, now + c.t);
+
+              gain.gain.setValueAtTime(0.001, now + c.t);
+              gain.gain.linearRampToValueAtTime(0.05, now + c.t + 0.05);
+              gain.gain.exponentialRampToValueAtTime(0.0001, now + c.t + c.d);
+
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start(now + c.t);
+              osc.stop(now + c.t + c.d + 0.05);
+            });
+          });
+        }
+      }
+
+      const audio = new RomanticSynthAudio();
+
+      // ==========================================
+      // 2. DOM REFERENCES & CANVAS SETUP
+      // ==========================================
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const buffBadge = document.getElementById('buffBadge');
+      const livesContainer = document.getElementById('livesContainer');
+      const loveMeterFill = document.getElementById('loveMeterFill');
+      const loveMeterPercent = document.getElementById('loveMeterPercent');
+      const timerDisplay = document.getElementById('timerDisplay');
+      const soundToggleBtn = document.getElementById('soundToggleBtn');
+      const soundIconOn = document.getElementById('soundIconOn');
+      const soundIconOff = document.getElementById('soundIconOff');
+
+      const startOverlay = document.getElementById('startOverlay');
+      const gameOverOverlay = document.getElementById('gameOverOverlay');
+      const victoryOverlay = document.getElementById('victoryOverlay');
+      const victoryStatsText = document.getElementById('victoryStatsText');
+
+      const startBtn = document.getElementById('startBtn');
+      const retryBtn = document.getElementById('retryBtn');
+      const replayVictoryBtn = document.getElementById('replayVictoryBtn');
+      const downloadCardBtn = document.getElementById('downloadCardBtn');
+      const welcomeGreetingBox = document.getElementById('welcomeGreetingBox');
+      const welcomeGreetingText = document.getElementById('welcomeGreetingText');
+      const ingameWelcomeBanner = document.getElementById('ingameWelcomeBanner');
+
+      // Personalized Welcome Messages for Mỹ Linh
+      const MY_LINH_WELCOME_MESSAGES = [
+        '“Chào mừng công chúa Mỹ Linh đến với khu vườn hoa hồng 20/10! Hôm nay mọi đóa hoa đẹp nhất đều nở vì em.”',
+        '“Mỹ Linh ơi, chồng đã chuẩn bị cả một bầu trời hoa hồng và trái tim đang rơi xuống — em sẵn sàng đón nhận chưa nào?”',
+        '“Chúc bà xã Mỹ Linh ngày 20/10 luôn xinh đẹp rạng rỡ, tràn ngập tiếng cười và hạnh phúc bên anh nhé!”',
+        '“Mỗi đóa hồng Mỹ Linh hứng được là một lời yêu thương ngọt ngào gửi tặng người vợ tuyệt vời nhất!”',
+        '“Bắt đầu thôi nào Mỹ Linh yêu dấu! Hãy lấp đầy 100% Love Meter để mở bó hoa bất ngờ cuối màn nhé!”'
+      ];
+
+      const MY_LINH_INGAME_GREETINGS = [
+        'Chào mừng bà xã Mỹ Linh! Chúc em hái được thật nhiều hoa hồng 20/10 nhé! 🌹💖',
+        'Mỹ Linh yêu dấu ơi, những đóa hoa đẹp nhất hôm nay đều dành riêng cho em! ✨',
+        'Chào mừng công chúa Mỹ Linh vào game! Cùng lấp đầy giỏ hoa tình yêu nào! 💕'
+      ];
+
+      let currentWelcomeIdx = 0;
+      let bannerTimeoutId = null;
+      let milestone50Shown = false;
+      let milestone80Shown = false;
+
+      function cycleWelcomeMessage() {
+        currentWelcomeIdx = (currentWelcomeIdx + 1) % MY_LINH_WELCOME_WELCOME_COUNT;
+      }
+
+      const MY_LINH_WELCOME_WELCOME_COUNT = MY_LINH_WELCOME_MESSAGES.length;
+
+      function showNextStartGreeting() {
+        currentWelcomeIdx = (currentWelcomeIdx + 1) % MY_LINH_WELCOME_MESSAGES.length;
+        welcomeGreetingText.style.opacity = '0';
+        setTimeout(() => {
+          welcomeGreetingText.textContent = MY_LINH_WELCOME_MESSAGES[currentWelcomeIdx];
+          welcomeGreetingText.style.opacity = '1';
+        }, 160);
+      }
+
+      welcomeGreetingBox.addEventListener('click', () => {
+        audio.init();
+        audio.playRoseChime();
+        showNextStartGreeting();
+      });
+
+      setInterval(() => {
+        if (currentState === 'START') {
+          showNextStartGreeting();
+        }
+      }, 4800);
+
+      function showIngameToast(message, durationMs = 4200) {
+        if (!ingameWelcomeBanner) return;
+        ingameWelcomeBanner.textContent = message;
+        ingameWelcomeBanner.classList.add('visible');
+        if (bannerTimeoutId) clearTimeout(bannerTimeoutId);
+        bannerTimeoutId = setTimeout(() => {
+          ingameWelcomeBanner.classList.remove('visible');
+        }, durationMs);
+      }
+
+      // Logical canvas dimensions
+      const W = 800;
+      const H = 600;
+
+      // ==========================================
+      // 3. GAME STATE MACHINE & VARIABLES
+      // ==========================================
+      const STATE = {
+        START: 'START',
+        PLAYING: 'PLAYING',
+        GAME_OVER: 'GAME_OVER',
+        VICTORY: 'VICTORY'
+      };
+
+      let currentState = STATE.START;
+      let score = 0;
+      let lives = 3;
+      let loveMeter = 0; // 0 to 100
+      let timeLeft = 60; // 60 seconds countdown
+      let rosesCaught = 0;
+      let heartsCaught = 0;
+
+      // Active buff state ('MAGNET' | 'MULTIPLIER' | null)
+      let activeBuff = null;
+      let buffTimeRemaining = 0;
+
+      // Player Basket state
+      const player = {
+        x: W / 2,
+        targetX: W / 2,
+        y: H - 68,
+        width: 128,
+        height: 64,
+        vx: 0,
+        tilt: 0,
+        hitFlash: 0
+      };
+
+      const keys = {
+        left: false,
+        right: false
+      };
+
+      // Background ambient petals
+      const bgPetals = [];
+      for (let i = 0; i < 34; i++) {
+        bgPetals.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: 5 + Math.random() * 7,
+          vy: 18 + Math.random() * 26,
+          vx: -12 + Math.random() * 24,
+          angle: Math.random() * Math.PI * 2,
+          spin: (Math.random() - 0.5) * 1.4,
+          swayOffset: Math.random() * Math.PI * 2,
+          color: i % 3 === 0 ? '#FDA4AF' : i % 3 === 1 ? '#FB7185' : '#FECDD3',
+          alpha: 0.35 + Math.random() * 0.4
+        });
+      }
+
+      // Falling gameplay items
+      let fallingItems = [];
+      let spawnCooldown = 0;
+
+      // Floating score popups & burst particles
+      let floatingTexts = [];
+      let burstParticles = [];
+
+      // Victory Blooming Bouquet animation state
+      let victoryAnimTime = 0;
+      let victoryBouquetRoses = [];
+      let victoryHearts = [];
+
+      function initVictoryBouquet() {
+        victoryAnimTime = 0;
+        victoryBouquetRoses = [];
+        victoryHearts = [];
+
+        // Create a lush multi-ring dome of 28 blooming roses
+        const ringConfigs = [
+          { count: 1, radiusX: 0, radiusY: 0, scale: 1.35 },
+          { count: 7, radiusX: 58, radiusY: 36, scale: 1.18 },
+          { count: 10, radiusX: 115, radiusY: 68, scale: 1.05 },
+          { count: 12, radiusX: 168, radiusY: 96, scale: 0.92 }
+        ];
+
+        let delayIdx = 0;
+        ringConfigs.forEach((ring) => {
+          for (let i = 0; i < ring.count; i++) {
+            const a = (i / ring.count) * Math.PI * 2 + (ring.count % 2) * 0.3;
+            const tx = Math.cos(a) * ring.radiusX + (Math.random() - 0.5) * 12;
+            const ty = Math.sin(a) * ring.radiusY - 22 + (Math.random() - 0.5) * 10;
+            victoryBouquetRoses.push({
+              targetOffsetX: tx,
+              targetOffsetY: ty,
+              scale: ring.scale * (0.92 + Math.random() * 0.16),
+              delay: delayIdx * 0.025,
+              hueVariant: delayIdx % 3, // 0: deep crimson, 1: ruby rose, 2: blush pink rose
+              rotation: (Math.random() - 0.5) * 0.5
+            });
+            delayIdx++;
+          }
+        });
+
+        // Glowing floating hearts for victory screen
+        for (let i = 0; i < 36; i++) {
+          victoryHearts.push({
+            x: W / 2 + (Math.random() - 0.5) * 480,
+            y: H / 2 + (Math.random() - 0.5) * 280,
+            vy: -25 - Math.random() * 45,
+            vx: (Math.random() - 0.5) * 30,
+            size: 8 + Math.random() * 14,
+            alpha: 0.4 + Math.random() * 0.6,
+            phase: Math.random() * Math.PI * 2
+          });
+        }
+      }
+
+      // ==========================================
+      // 4. INPUT & CONTROL HANDLERS
+      // ==========================================
+      function clientXToCanvasX(clientX) {
+        const rect = canvas.getBoundingClientRect();
+        const relX = (clientX - rect.left) / rect.width;
+        return Math.max(player.width * 0.55, Math.min(W - player.width * 0.55, relX * W));
+      }
+
+      canvas.addEventListener('mousemove', (e) => {
+        if (currentState === STATE.PLAYING) {
+          player.targetX = clientXToCanvasX(e.clientX);
+        }
+      });
+
+      canvas.addEventListener('touchstart', (e) => {
+        audio.init();
+        if (currentState === STATE.PLAYING && e.touches.length > 0) {
+          player.targetX = clientXToCanvasX(e.touches[0].clientX);
+        }
+      }, { passive: true });
+
+      canvas.addEventListener('touchmove', (e) => {
+        if (currentState === STATE.PLAYING && e.touches.length > 0) {
+          e.preventDefault();
+          player.targetX = clientXToCanvasX(e.touches[0].clientX);
+        }
+      }, { passive: false });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+          keys.left = true;
+        }
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+          keys.right = true;
+        }
+      });
+
+      window.addEventListener('keyup', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+          keys.left = false;
+        }
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+          keys.right = false;
+        }
+      });
+
+      soundToggleBtn.addEventListener('click', () => {
+        audio.init();
+        const isMuted = audio.toggleMute();
+        soundIconOn.style.display = isMuted ? 'none' : 'block';
+        soundIconOff.style.display = isMuted ? 'block' : 'none';
+      });
+
+      // ==========================================
+      // 5. GAME FLOW & HUD SYNC
+      // ==========================================
+      function updateHUD() {
+        scoreDisplay.textContent = Math.floor(score);
+        const clampedLove = Math.min(100, Math.max(0, Math.round(loveMeter)));
+        loveMeterFill.style.width = clampedLove + '%';
+        loveMeterPercent.textContent = clampedLove + '%';
+        timerDisplay.textContent = Math.max(0, Math.ceil(timeLeft));
+
+        // Check milestone encouragements for Mỹ Linh
+        if (currentState === STATE.PLAYING) {
+          if (!milestone50Shown && clampedLove >= 50 && clampedLove < 80) {
+            milestone50Shown = true;
+            showIngameToast('Tuyệt quá Mỹ Linh ơi! Giỏ hoa tình yêu đã đầy một nửa rồi! 💕', 3500);
+          } else if (!milestone80Shown && clampedLove >= 80 && clampedLove < 100) {
+            milestone80Shown = true;
+            showIngameToast('Sắp tròn 100% Love Meter rồi bà xã Mỹ Linh yêu dấu ơi! ✨', 3500);
+          }
+        }
+
+        // Update 3 heart icons
+        const heartNodes = livesContainer.querySelectorAll('.life-heart');
+        heartNodes.forEach((svg, idx) => {
+          if (idx < lives) {
+            svg.classList.remove('lost');
+          } else {
+            svg.classList.add('lost');
+          }
+        });
+
+        // Update buff badge
+        if (activeBuff && buffTimeRemaining > 0) {
+          buffBadge.classList.add('active');
+          const label = activeBuff === 'MAGNET' ? 'NAM CHÂM' : '2x ĐIỂM';
+          buffBadge.textContent = label + ' ' + Math.ceil(buffTimeRemaining) + 's';
+        } else {
+          buffBadge.classList.remove('active');
+        }
+      }
+
+      function startGame() {
+        audio.init();
+        audio.playRoseChime();
+
+        score = 0;
+        lives = 3;
+        loveMeter = 0;
+        timeLeft = 60;
+        rosesCaught = 0;
+        heartsCaught = 0;
+        activeBuff = null;
+        buffTimeRemaining = 0;
+        milestone50Shown = false;
+        milestone80Shown = false;
+
+        fallingItems = [];
+        floatingTexts = [];
+        burstParticles = [];
+        spawnCooldown = 0.25;
+
+        player.x = W / 2;
+        player.targetX = W / 2;
+        player.vx = 0;
+        player.tilt = 0;
+        player.hitFlash = 0;
+
+        currentState = STATE.PLAYING;
+        startOverlay.classList.add('hidden');
+        gameOverOverlay.classList.add('hidden');
+        victoryOverlay.classList.add('hidden');
+        updateHUD();
+
+        // Welcome Mỹ Linh when entering the game
+        const welcomeMsg = MY_LINH_INGAME_GREETINGS[Math.floor(Math.random() * MY_LINH_INGAME_GREETINGS.length)];
+        showIngameToast(welcomeMsg, 4500);
+      }
+
+      function triggerVictory() {
+        if (currentState === STATE.VICTORY) return;
+        currentState = STATE.VICTORY;
+        if (ingameWelcomeBanner) ingameWelcomeBanner.classList.remove('visible');
+        audio.playVictoryJingle();
+        initVictoryBouquet();
+        updateHUD();
+
+        const displayLove = Math.min(100, Math.round(loveMeter));
+        victoryStatsText.textContent =
+          `Chúc mừng Mỹ Linh! · Điểm số: ${Math.floor(score)} · Love Meter: ${displayLove}% · Hoa & Tim đã gom: ${rosesCaught + heartsCaught}`;
+        victoryOverlay.classList.remove('hidden');
+      }
+
+      function triggerGameOver() {
+        if (currentState === STATE.GAME_OVER) return;
+        currentState = STATE.GAME_OVER;
+        if (ingameWelcomeBanner) ingameWelcomeBanner.classList.remove('visible');
+        updateHUD();
+        gameOverOverlay.classList.remove('hidden');
+      }
+
+      startBtn.addEventListener('click', startGame);
+      retryBtn.addEventListener('click', startGame);
+      replayVictoryBtn.addEventListener('click', startGame);
+
+      // ==========================================
+      // 6. SPAWNING & PARTICLE HELPERS
+      // ==========================================
+      function spawnItem() {
+        const margin = 56;
+        const x = margin + Math.random() * (W - margin * 2);
+        const roll = Math.random();
+
+        // Easier, more generous probabilities:
+        // 44% Red Rose
+        // 34% Pink Heart
+        // 10% Special Gift Box
+        // 12% Hazard (Thorn branch, Rain cloud, or Deadline clock)
+        let type = 'ROSE';
+        let hazardSubtype = 'THORN';
+
+        if (roll < 0.44) {
+          type = 'ROSE';
+        } else if (roll < 0.78) {
+          type = 'HEART';
+        } else if (roll < 0.88) {
+          type = 'GIFT';
+        } else {
+          type = 'HAZARD';
+          const hRoll = Math.random();
+          hazardSubtype = hRoll < 0.34 ? 'THORN' : hRoll < 0.67 ? 'CLOUD' : 'CLOCK';
+        }
+
+        const speedScale = 1 + (60 - timeLeft) * 0.002;
+        let vy = (105 + Math.random() * 60) * speedScale;
+        if (type === 'GIFT') vy = 128 * speedScale;
+
+        fallingItems.push({
+          x,
+          y: -36,
+          vx: (Math.random() - 0.5) * 18,
+          vy,
+          radius: type === 'GIFT' ? 24 : 22,
+          type,
+          hazardSubtype,
+          angle: (Math.random() - 0.5) * 0.4,
+          spin: (Math.random() - 0.5) * 1.4,
+          swayPhase: Math.random() * Math.PI * 2,
+          magnetized: false
+        });
+      }
+
+      function addFloatingText(x, y, text, color, scale = 1) {
+        floatingTexts.push({
+          x,
+          y,
+          text,
+          color,
+          vy: -55,
+          life: 1.0,
+          maxLife: 1.0,
+          scale
+        });
+      }
+
+      function spawnBurst(x, y, color, count = 14, isHeart = false) {
+        for (let i = 0; i < count; i++) {
+          const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
+          const speed = 45 + Math.random() * 115;
+          burstParticles.push({
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 25,
+            size: 4 + Math.random() * 5,
+            color,
+            life: 0.65 + Math.random() * 0.3,
+            maxLife: 0.95,
+            isHeart
+          });
+        }
+      }
+
+      // ==========================================
+      // 7. PROCEDURAL CANVAS 2D ART RENDERING
+      // ==========================================
+      function drawHeartShape(c, x, y, size) {
+        c.beginPath();
+        const topCurveHeight = size * 0.3;
+        c.moveTo(x, y + topCurveHeight);
+        c.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + topCurveHeight);
+        c.bezierCurveTo(x - size / 2, y + (size + topCurveHeight) / 2, x, y + (size + topCurveHeight) / 1.45, x, y + size);
+        c.bezierCurveTo(x, y + (size + topCurveHeight) / 1.45, x + size / 2, y + (size + topCurveHeight) / 2, x + size / 2, y + topCurveHeight);
+        c.bezierCurveTo(x + size / 2, y, x, y, x, y + topCurveHeight);
+        c.closePath();
+      }
+
+      // Draw a lush blooming rose procedurally
+      function drawProceduralRose(c, x, y, scale = 1, angle = 0, variant = 0, withStem = true) {
+        c.save();
+        c.translate(x, y);
+        c.rotate(angle);
+        c.scale(scale, scale);
+
+        // Stem & leaves when falling or in bouquet
+        if (withStem) {
+          c.strokeStyle = '#15803D';
+          c.lineWidth = 3.2;
+          c.lineCap = 'round';
+          c.beginPath();
+          c.moveTo(0, 6);
+          c.quadraticCurveTo(3, 18, -2, 26);
+          c.stroke();
+
+          // Left & right green leaves
+          c.fillStyle = '#22C55E';
+          c.beginPath();
+          c.ellipse(-8, 16, 7, 3.8, -0.5, 0, Math.PI * 2);
+          c.fill();
+          c.beginPath();
+          c.ellipse(7, 19, 6.5, 3.5, 0.5, 0, Math.PI * 2);
+          c.fill();
+        }
+
+        const outerColor = variant === 2 ? '#FB7185' : variant === 1 ? '#E11D48' : '#BE123C';
+        const midColor = variant === 2 ? '#FDA4AF' : variant === 1 ? '#F43F5E' : '#E11D48';
+        const innerColor = variant === 2 ? '#FFE4E6' : '#FDA4AF';
+
+        // Outer 5 petals
+        c.fillStyle = outerColor;
+        for (let i = 0; i < 5; i++) {
+          const a = (i * Math.PI * 2) / 5;
+          c.beginPath();
+          c.arc(Math.cos(a) * 7, Math.sin(a) * 7 - 2, 8.5, 0, Math.PI * 2);
+          c.fill();
+        }
+
+        // Middle 5 petals
+        c.fillStyle = midColor;
+        for (let i = 0; i < 5; i++) {
+          const a = (i * Math.PI * 2) / 5 + 0.6;
+          c.beginPath();
+          c.arc(Math.cos(a) * 4.5, Math.sin(a) * 4.5 - 2, 6.2, 0, Math.PI * 2);
+          c.fill();
+        }
+
+        // Inner swirl bud
+        c.fillStyle = innerColor;
+        c.beginPath();
+        c.arc(0, -2, 4.2, 0, Math.PI * 2);
+        c.fill();
+
+        c.strokeStyle = outerColor;
+        c.lineWidth = 1.4;
+        c.beginPath();
+        c.arc(0, -2, 2.5, 0.4, Math.PI * 1.85);
+        c.stroke();
+
+        c.restore();
+      }
+
+      // Draw glossy Pink Heart item
+      function drawProceduralHeartItem(c, x, y, scale = 1, angle = 0) {
+        c.save();
+        c.translate(x, y);
+        c.rotate(angle);
+        c.scale(scale, scale);
+
+        // Soft outer glow
+        c.fillStyle = 'rgba(251, 113, 133, 0.24)';
+        drawHeartShape(c, 0, -16, 32);
+        c.fill();
+
+        const grad = c.createRadialGradient(-4, -8, 2, 0, 0, 22);
+        grad.addColorStop(0, '#FFF1F2');
+        grad.addColorStop(0.35, '#FB7185');
+        grad.addColorStop(1, '#E11D48');
+
+        c.fillStyle = grad;
+        drawHeartShape(c, 0, -13, 26);
+        c.fill();
+
+        // Specular highlight
+        c.fillStyle = 'rgba(255, 255, 255, 0.72)';
+        c.beginPath();
+        c.ellipse(-5.5, -5.5, 3.6, 2.1, -0.6, 0, Math.PI * 2);
+        c.fill();
+
+        c.restore();
+      }
+
+      // Draw Special Gift Box
+      function drawProceduralGiftBox(c, x, y, angle = 0, time = 0) {
+        c.save();
+        c.translate(x, y);
+        c.rotate(angle + Math.sin(time * 8) * 0.08);
+
+        // Golden aura
+        c.fillStyle = 'rgba(251, 191, 36, 0.25)';
+        c.beginPath();
+        c.arc(0, 0, 28, 0, Math.PI * 2);
+        c.fill();
+
+        // Box body
+        c.fillStyle = '#FFFBEB';
+        c.strokeStyle = '#D97706';
+        c.lineWidth = 2;
+        c.beginPath();
+        c.roundRect(-16, -12, 32, 28, 5);
+        c.fill();
+        c.stroke();
+
+        // Box lid
+        c.fillStyle = '#FDE68A';
+        c.beginPath();
+        c.roundRect(-18, -17, 36, 8, 3);
+        c.fill();
+        c.stroke();
+
+        // Red satin vertical & horizontal ribbons
+        c.fillStyle = '#E11D48';
+        c.fillRect(-3.5, -17, 7, 33);
+        c.fillRect(-16, -1, 32, 6);
+
+        // Ribbon bow on top
+        c.strokeStyle = '#E11D48';
+        c.lineWidth = 3;
+        c.beginPath();
+        c.ellipse(-6, -20, 6, 3.5, -0.4, 0, Math.PI * 2);
+        c.stroke();
+        c.beginPath();
+        c.ellipse(6, -20, 6, 3.5, 0.4, 0, Math.PI * 2);
+        c.stroke();
+
+        c.restore();
+      }
+
+      // Draw Hazards: Thorn branch, Rain cloud, or Deadline clock
+      function drawProceduralHazard(c, item, time) {
+        c.save();
+        c.translate(item.x, item.y);
+
+        if (item.hazardSubtype === 'THORN') {
+          c.rotate(item.angle);
+          // Warning halo
+          c.fillStyle = 'rgba(136, 19, 55, 0.12)';
+          c.beginPath();
+          c.arc(0, 0, 22, 0, Math.PI * 2);
+          c.fill();
+
+          // gnarled dark thorn branch
+          c.strokeStyle = '#4A1D24';
+          c.lineWidth = 4.5;
+          c.lineCap = 'round';
+          c.beginPath();
+          c.moveTo(-18, -10);
+          c.quadraticCurveTo(0, 6, 18, -8);
+          c.moveTo(-12, 10);
+          c.quadraticCurveTo(2, -5, 15, 11);
+          c.stroke();
+
+          // Sharp crimson-tipped thorns
+          c.fillStyle = '#9F1239';
+          const thorns = [
+            [-10, -4, -14, -14],
+            [0, 1, 2, -10],
+            [10, -3, 14, -12],
+            [-5, 6, -9, 15],
+            [7, 6, 11, 15]
+          ];
+          thorns.forEach(([bx, by, tx, ty]) => {
+            c.beginPath();
+            c.moveTo(bx - 2.5, by);
+            c.lineTo(tx, ty);
+            c.lineTo(bx + 2.5, by);
+            c.closePath();
+            c.fill();
+          });
+        } else if (item.hazardSubtype === 'CLOUD') {
+          // Moody storm cloud with raindrops
+          c.fillStyle = '#475569';
+          c.beginPath();
+          c.arc(-10, 0, 11, 0, Math.PI * 2);
+          c.arc(0, -6, 13, 0, Math.PI * 2);
+          c.arc(11, 0, 10, 0, Math.PI * 2);
+          c.roundRect(-18, -2, 36, 12, 6);
+          c.fill();
+
+          // Lightning bolt
+          c.fillStyle = '#FACC15';
+          c.beginPath();
+          c.moveTo(2, 6);
+          c.lineTo(-4, 15);
+          c.lineTo(1, 15);
+          c.lineTo(-2, 23);
+          c.lineTo(6, 13);
+          c.lineTo(1, 13);
+          c.closePath();
+          c.fill();
+
+          // Raindrops
+          c.strokeStyle = '#38BDF8';
+          c.lineWidth = 2;
+          const dropOffset = (time * 40) % 8;
+          c.beginPath();
+          c.moveTo(-11, 11 + dropOffset * 0.5);
+          c.lineTo(-13, 17 + dropOffset * 0.5);
+          c.moveTo(11, 11 + dropOffset * 0.5);
+          c.lineTo(9, 17 + dropOffset * 0.5);
+          c.stroke();
+        } else {
+          // Deadline alarm clock
+          c.rotate(Math.sin(time * 24) * 0.14);
+          // Twin bells
+          c.fillStyle = '#DC2626';
+          c.beginPath();
+          c.arc(-12, -14, 6, Math.PI * 0.8, Math.PI * 2.1);
+          c.fill();
+          c.beginPath();
+          c.arc(12, -14, 6, Math.PI * 0.9, Math.PI * 2.2);
+          c.fill();
+
+          // Clock body
+          c.fillStyle = '#FEF2F2';
+          c.strokeStyle = '#DC2626';
+          c.lineWidth = 3;
+          c.beginPath();
+          c.arc(0, 0, 16, 0, Math.PI * 2);
+          c.fill();
+          c.stroke();
+
+          // Clock hands spinning fast
+          c.strokeStyle = '#7F1D1D';
+          c.lineWidth = 2;
+          c.beginPath();
+          c.moveTo(0, 0);
+          c.lineTo(0, -10);
+          c.moveTo(0, 0);
+          c.lineTo(Math.cos(time * 10) * 8, Math.sin(time * 10) * 8);
+          c.stroke();
+        }
+
+        c.restore();
+      }
+
+      // Draw Player: Adorable Chibi Character + Ornate Woven Flower Basket with Pink Ribbon
+      function drawPlayerBasket(c, time) {
+        c.save();
+        c.translate(player.x, player.y);
+        c.rotate(player.tilt);
+
+        // Active Buff Glowing Aura
+        if (activeBuff && buffTimeRemaining > 0) {
+          const pulse = 1 + Math.sin(time * 8) * 0.08;
+          const auraGrad = c.createRadialGradient(0, 0, 18, 0, 0, 78 * pulse);
+          if (activeBuff === 'MAGNET') {
+            auraGrad.addColorStop(0, 'rgba(244, 63, 94, 0.36)');
+            auraGrad.addColorStop(0.6, 'rgba(251, 113, 133, 0.18)');
+            auraGrad.addColorStop(1, 'rgba(251, 113, 133, 0)');
+          } else {
+            auraGrad.addColorStop(0, 'rgba(251, 191, 36, 0.45)');
+            auraGrad.addColorStop(0.6, 'rgba(245, 158, 11, 0.22)');
+            auraGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+          }
+          c.fillStyle = auraGrad;
+          c.beginPath();
+          c.arc(0, -4, 78 * pulse, 0, Math.PI * 2);
+          c.fill();
+
+          // Orbiting sparkle ring
+          c.strokeStyle = activeBuff === 'MAGNET' ? 'rgba(225, 29, 72, 0.55)' : 'rgba(217, 119, 6, 0.65)';
+          c.lineWidth = 2;
+          c.setLineDash([8, 6]);
+          c.beginPath();
+          c.ellipse(0, 2, 66, 26, 0, 0, Math.PI * 2);
+          c.stroke();
+          c.setLineDash([]);
+        }
+
+        // Soft ground shadow
+        c.fillStyle = 'rgba(136, 19, 55, 0.14)';
+        c.beginPath();
+        c.ellipse(0, 34, 54, 10, 0, 0, Math.PI * 2);
+        c.fill();
+
+        // Cute Chibi Character peeking happily behind the woven basket
+        c.save();
+        c.translate(0, -34 + Math.sin(time * 5) * 1.8);
+
+        // Soft dark hair bun & side locks
+        c.fillStyle = '#3B1D2E';
+        c.beginPath();
+        c.arc(0, -18, 9, 0, Math.PI * 2); // top bun
+        c.arc(0, -2, 20, 0, Math.PI * 2); // main hair
+        c.fill();
+
+        // Hair ribbon bow
+        c.fillStyle = '#FB7185';
+        c.beginPath();
+        c.ellipse(-7, -15, 5, 2.5, -0.3, 0, Math.PI * 2);
+        c.ellipse(7, -15, 5, 2.5, 0.3, 0, Math.PI * 2);
+        c.fill();
+
+        // Chibi face
+        c.fillStyle = '#FFE4D6';
+        c.beginPath();
+        c.arc(0, 1, 16, 0, Math.PI * 2);
+        c.fill();
+
+        // Front bangs
+        c.fillStyle = '#3B1D2E';
+        c.beginPath();
+        c.arc(0, -5, 16, Math.PI * 1.08, Math.PI * 1.92);
+        c.fill();
+
+        // Blinking eyes
+        const isBlinking = (time % 3.6) > 3.45;
+        c.strokeStyle = '#3B1D2E';
+        c.fillStyle = '#3B1D2E';
+        c.lineWidth = 2;
+        if (isBlinking || player.hitFlash > 0) {
+          c.beginPath();
+          c.arc(-6, 1, 3, 0.2, Math.PI - 0.2);
+          c.stroke();
+          c.beginPath();
+          c.arc(6, 1, 3, 0.2, Math.PI - 0.2);
+          c.stroke();
+        } else {
+          c.beginPath();
+          c.arc(-6, 1, 2.4, 0, Math.PI * 2);
+          c.arc(6, 1, 2.4, 0, Math.PI * 2);
+          c.fill();
+          // Eye shine
+          c.fillStyle = '#FFFFFF';
+          c.beginPath();
+          c.arc(-6.8, 0.2, 0.9, 0, Math.PI * 2);
+          c.arc(5.2, 0.2, 0.9, 0, Math.PI * 2);
+          c.fill();
+        }
+
+        // Rosy blush cheeks
+        c.fillStyle = 'rgba(251, 113, 133, 0.55)';
+        c.beginPath();
+        c.ellipse(-10, 4.5, 3.4, 2, 0, 0, Math.PI * 2);
+        c.ellipse(10, 4.5, 3.4, 2, 0, 0, Math.PI * 2);
+        c.fill();
+
+        // Sweet smile
+        c.strokeStyle = '#9F1239';
+        c.lineWidth = 1.6;
+        c.beginPath();
+        if (player.hitFlash > 0) {
+          c.arc(0, 8, 2.5, Math.PI, Math.PI * 2);
+        } else {
+          c.arc(0, 4.5, 3.5, 0.15 * Math.PI, 0.85 * Math.PI);
+        }
+        c.stroke();
+        c.restore();
+
+        // Woven Basket Handle Arch
+        c.strokeStyle = '#B45309';
+        c.lineWidth = 5;
+        c.beginPath();
+        c.arc(0, -4, 46, Math.PI * 1.08, Math.PI * 1.92);
+        c.stroke();
+
+        c.strokeStyle = '#F59E0B';
+        c.lineWidth = 2;
+        c.beginPath();
+        c.arc(0, -4, 46, Math.PI * 1.08, Math.PI * 1.92);
+        c.stroke();
+
+        // Accumulated Roses tucked inside the basket based on catches!
+        const visibleRoses = Math.min(9, Math.floor((rosesCaught + heartsCaught) / 2) + 1);
+        for (let i = 0; i < visibleRoses; i++) {
+          const rx = -34 + (i / Math.max(1, visibleRoses - 1 || 1)) * 68 + (i % 2 === 0 ? -4 : 4);
+          const ry = -10 - (i % 3) * 4;
+          drawProceduralRose(c, visibleRoses === 1 ? 0 : rx, ry, 0.72, (i - 4) * 0.1, i % 3, false);
+        }
+
+        // Woven Basket Body (Trapezoid with rounded base)
+        const basketGrad = c.createLinearGradient(0, -8, 0, 28);
+        basketGrad.addColorStop(0, '#F59E0B');
+        basketGrad.addColorStop(0.5, '#D97706');
+        basketGrad.addColorStop(1, '#92400E');
+
+        c.fillStyle = basketGrad;
+        c.strokeStyle = '#78350F';
+        c.lineWidth = 2;
+        c.beginPath();
+        c.moveTo(-50, -6);
+        c.lineTo(50, -6);
+        c.quadraticCurveTo(44, 28, 28, 30);
+        c.lineTo(-28, 30);
+        c.quadraticCurveTo(-44, 28, -50, -6);
+        c.closePath();
+        c.fill();
+        c.stroke();
+
+        // Woven wicker cross-hatching texture
+        c.strokeStyle = 'rgba(254, 243, 199, 0.38)';
+        c.lineWidth = 1.5;
+        for (let row = 2; row <= 22; row += 7) {
+          c.beginPath();
+          c.moveTo(-46 + row * 0.4, row);
+          c.lineTo(46 - row * 0.4, row);
+          c.stroke();
+        }
+        for (let col = -36; col <= 36; col += 12) {
+          c.beginPath();
+          c.moveTo(col, -4);
+          c.lineTo(col * 0.78, 28);
+          c.stroke();
+        }
+
+        // Ornate braided rim
+        c.fillStyle = '#FBBF24';
+        c.strokeStyle = '#92400E';
+        c.lineWidth = 2;
+        c.beginPath();
+        c.roundRect(-54, -10, 108, 9, 4.5);
+        c.fill();
+        c.stroke();
+
+        // Soft Pink Satin Ribbon Bow on center of basket
+        c.fillStyle = '#FB7185';
+        c.strokeStyle = '#BE123C';
+        c.lineWidth = 1.5;
+
+        // Ribbon tails
+        c.beginPath();
+        c.moveTo(-4, 12);
+        c.lineTo(-14, 26);
+        c.lineTo(-6, 25);
+        c.lineTo(0, 14);
+        c.closePath();
+        c.fill();
+
+        c.beginPath();
+        c.moveTo(4, 12);
+        c.lineTo(14, 26);
+        c.lineTo(6, 25);
+        c.lineTo(0, 14);
+        c.closePath();
+        c.fill();
+
+        // Ribbon loops
+        c.beginPath();
+        c.ellipse(-10, 9, 9, 5, -0.25, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+
+        c.beginPath();
+        c.ellipse(10, 9, 9, 5, 0.25, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+
+        // Ribbon center knot
+        c.fillStyle = '#E11D48';
+        c.beginPath();
+        c.arc(0, 9, 4.2, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+
+        // Chibi little hands holding basket rim
+        c.fillStyle = '#FFE4D6';
+        c.strokeStyle = '#92400E';
+        c.lineWidth = 1.4;
+        c.beginPath();
+        c.arc(-32, -7, 4.5, 0, Math.PI * 2);
+        c.arc(32, -7, 4.5, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+
+        // Delicate "Mỹ Linh ♥" nameplate tag on the lower basket front
+        c.fillStyle = 'rgba(255, 250, 249, 0.94)';
+        c.strokeStyle = '#E11D48';
+        c.lineWidth = 1.2;
+        c.beginPath();
+        c.roundRect(-30, 18, 60, 14, 7);
+        c.fill();
+        c.stroke();
+
+        c.font = '700 9.5px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        c.fillStyle = '#9F1239';
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        c.fillText('Mỹ Linh ♥', 0, 25.5);
+
+        c.restore();
+      }
+
+      // Draw Background & Drifting Rose Petals
+      function drawRomanticBackground(c, dt, time) {
+        // Pastel sky gradient
+        const bgGrad = c.createLinearGradient(0, 0, 0, H);
+        bgGrad.addColorStop(0, '#FFFDFC');
+        bgGrad.addColorStop(0.55, '#FFF0F5');
+        bgGrad.addColorStop(1, '#FFDDE8');
+        c.fillStyle = bgGrad;
+        c.fillRect(0, 0, W, H);
+
+        // Subtle golden-pink sunlight rays from top center
+        c.save();
+        const rayGrad = c.createRadialGradient(W / 2, 40, 10, W / 2, 40, 420);
+        rayGrad.addColorStop(0, 'rgba(254, 243, 199, 0.45)');
+        rayGrad.addColorStop(0.6, 'rgba(255, 228, 230, 0.2)');
+        rayGrad.addColorStop(1, 'rgba(255, 228, 230, 0)');
+        c.fillStyle = rayGrad;
+        c.fillRect(0, 0, W, H);
+        c.restore();
+
+        // Soft rolling pastel garden hills at bottom
+        c.fillStyle = 'rgba(254, 205, 211, 0.45)';
+        c.beginPath();
+        c.moveTo(0, H);
+        c.quadraticCurveTo(W * 0.28, H - 78, W * 0.58, H - 42);
+        c.quadraticCurveTo(W * 0.82, H - 18, W, H - 58);
+        c.lineTo(W, H);
+        c.closePath();
+        c.fill();
+
+        c.fillStyle = 'rgba(251, 113, 133, 0.16)';
+        c.beginPath();
+        c.moveTo(0, H);
+        c.quadraticCurveTo(W * 0.35, H - 35, W * 0.72, H - 62);
+        c.quadraticCurveTo(W * 0.9, H - 72, W, H - 32);
+        c.lineTo(W, H);
+        c.closePath();
+        c.fill();
+
+        // Update and draw drifting rose petals
+        for (let i = 0; i < bgPetals.length; i++) {
+          const p = bgPetals[i];
+          p.y += p.vy * dt;
+          p.x += (p.vx + Math.sin(time * 1.5 + p.swayOffset) * 14) * dt;
+          p.angle += p.spin * dt;
+
+          if (p.y > H + 20) {
+            p.y = -18;
+            p.x = Math.random() * W;
+          }
+          if (p.x < -20) p.x = W + 15;
+          if (p.x > W + 20) p.x = -15;
+
+          c.save();
+          c.translate(p.x, p.y);
+          c.rotate(p.angle);
+          c.globalAlpha = p.alpha;
+          c.fillStyle = p.color;
+          c.beginPath();
+          c.moveTo(0, -p.r);
+          c.bezierCurveTo(p.r, -p.r * 0.8, p.r * 0.9, p.r, 0, p.r);
+          c.bezierCurveTo(-p.r * 0.9, p.r, -p.r, -p.r * 0.8, 0, -p.r);
+          c.fill();
+          c.restore();
+        }
+      }
+
+      // Draw the Blooming Bouquet Celebration on Canvas (used for both Victory state & PNG Card Export)
+      function drawVictoryBouquetScene(c, animProgress, includeCardText = false) {
+        const centerX = W / 2;
+        const basketY = includeCardText ? 425 : 345;
+
+        // Soft golden-rose radiant backdrop glow behind the bouquet
+        c.save();
+        const glow = c.createRadialGradient(centerX, basketY - 95, 20, centerX, basketY - 95, 270);
+        glow.addColorStop(0, 'rgba(254, 240, 138, 0.78)');
+        glow.addColorStop(0.5, 'rgba(251, 113, 133, 0.28)');
+        glow.addColorStop(1, 'rgba(251, 113, 133, 0)');
+        c.fillStyle = glow;
+        c.beginPath();
+        c.arc(centerX, basketY - 95, 270, 0, Math.PI * 2);
+        c.fill();
+
+        // Ornamental tissue wrapping paper fan behind the roses
+        const wrapScale = Math.min(1, animProgress * 1.4);
+        c.save();
+        c.translate(centerX, basketY - 20);
+        c.scale(wrapScale, wrapScale);
+
+        c.fillStyle = '#FFF1F2';
+        c.strokeStyle = '#FDA4AF';
+        c.lineWidth = 2;
+        c.beginPath();
+        c.moveTo(0, 20);
+        c.lineTo(-195, -85);
+        c.quadraticCurveTo(-110, -185, 0, -165);
+        c.quadraticCurveTo(110, -185, 195, -85);
+        c.closePath();
+        c.fill();
+        c.stroke();
+
+        // Inner gold-trimmed wrapping layer
+        c.fillStyle = '#FFE4E6';
+        c.strokeStyle = '#F59E0B';
+        c.lineWidth = 1.8;
+        c.beginPath();
+        c.moveTo(0, 16);
+        c.lineTo(-165, -72);
+        c.quadraticCurveTo(-80, -160, 0, -145);
+        c.quadraticCurveTo(80, -160, 165, -72);
+        c.closePath();
+        c.fill();
+        c.stroke();
+        c.restore();
+
+        // Baby's breath (tiny white gypsophila blossoms around the bouquet)
+        if (animProgress > 0.3) {
+          const babyAlpha = Math.min(1, (animProgress - 0.3) * 1.5);
+          c.save();
+          c.globalAlpha = babyAlpha;
+          c.fillStyle = '#FFFFFF';
+          for (let i = 0; i < 24; i++) {
+            const angle = (i / 24) * Math.PI * 1.35 + Math.PI * 0.82;
+            const radX = 185 + (i % 3) * 14;
+            const radY = 112 + (i % 2) * 12;
+            const bx = centerX + Math.cos(angle) * radX;
+            const by = basketY - 75 + Math.sin(angle) * radY;
+            c.beginPath();
+            c.arc(bx, by, 3.5, 0, Math.PI * 2);
+            c.arc(bx + 5, by - 3, 2.5, 0, Math.PI * 2);
+            c.fill();
+          }
+          c.restore();
+        }
+
+        // Blooming Red & Pink Roses radiating outward from the basket
+        victoryBouquetRoses.forEach((r) => {
+          const localT = Math.max(0, Math.min(1, (animProgress - r.delay) * 1.55));
+          if (localT <= 0) return;
+          // Elastic ease-out bloom
+          const ease = 1 - Math.pow(1 - localT, 3) + Math.sin(localT * Math.PI) * 0.14;
+          const rx = centerX + r.targetOffsetX * ease;
+          const ry = (basketY - 58) + r.targetOffsetY * ease;
+          drawProceduralRose(c, rx, ry, r.scale * ease, r.rotation, r.hueVariant, true);
+        });
+
+        // Ornate Woven Basket at the base of the bouquet
+        c.save();
+        c.translate(centerX, basketY);
+        c.scale(1.25, 1.25);
+
+        const basketGrad = c.createLinearGradient(0, -8, 0, 28);
+        basketGrad.addColorStop(0, '#F59E0B');
+        basketGrad.addColorStop(0.5, '#D97706');
+        basketGrad.addColorStop(1, '#92400E');
+
+        c.fillStyle = basketGrad;
+        c.strokeStyle = '#78350F';
+        c.lineWidth = 2;
+        c.beginPath();
+        c.moveTo(-54, -6);
+        c.lineTo(54, -6);
+        c.quadraticCurveTo(46, 30, 30, 32);
+        c.lineTo(-30, 32);
+        c.quadraticCurveTo(-46, 30, -54, -6);
+        c.closePath();
+        c.fill();
+        c.stroke();
+
+        // Rim
+        c.fillStyle = '#FBBF24';
+        c.beginPath();
+        c.roundRect(-58, -10, 116, 9, 4.5);
+        c.fill();
+        c.stroke();
+
+        // Big Romantic Pink Ribbon Bow
+        c.fillStyle = '#FB7185';
+        c.strokeStyle = '#BE123C';
+        c.lineWidth = 1.6;
+        c.beginPath();
+        c.ellipse(-14, 10, 12, 6.5, -0.25, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+        c.beginPath();
+        c.ellipse(14, 10, 12, 6.5, 0.25, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+        c.fillStyle = '#E11D48';
+        c.beginPath();
+        c.arc(0, 10, 5, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+        c.restore();
+
+        // Floating glowing particle hearts
+        victoryHearts.forEach((h) => {
+          c.save();
+          c.globalAlpha = h.alpha;
+          c.fillStyle = '#E11D48';
+          drawHeartShape(c, h.x, h.y, h.size);
+          c.fill();
+          c.restore();
+        });
+
+        // When exporting the PNG Greeting Card, draw the luxury card border & romantic typography directly onto the image
+        if (includeCardText) {
+          // Outer golden-rose frame
+          c.strokeStyle = '#D97706';
+          c.lineWidth = 4;
+          c.strokeRect(18, 18, W - 36, H - 36);
+          c.strokeStyle = 'rgba(225, 29, 72, 0.35)';
+          c.lineWidth = 1.5;
+          c.strokeRect(26, 26, W - 52, H - 52);
+
+          // Top Greeting Banner Ribbon
+          c.fillStyle = 'rgba(255, 250, 250, 0.94)';
+          c.strokeStyle = 'rgba(217, 119, 6, 0.55)';
+          c.lineWidth = 2;
+          c.beginPath();
+          c.roundRect(70, 42, W - 140, 132, 18);
+          c.fill();
+          c.stroke();
+
+          c.textAlign = 'center';
+          c.fillStyle = '#E11D48';
+          c.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          c.fillText('DÀNH TẶNG BÀ XÃ MỸ LINH YÊU DẤU · 20/10', centerX, 72);
+
+          c.fillStyle = '#881337';
+          c.font = 'italic bold 23px Georgia, serif';
+          c.fillText('“Happy Vietnamese Women’s Day to my darling wifey!', centerX, 108);
+          c.fillText('Love you always”', centerX, 138);
+
+          c.fillStyle = '#9F1239';
+          c.font = '600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          c.fillText(`Chúc mừng Mỹ Linh!  ·  Điểm số: ${Math.floor(score)}  ·  Love Meter: ${Math.min(100, Math.round(loveMeter))}%  ·  Love you always ♥`, centerX, 558);
+        }
+
+        c.restore();
+      }
+
+      // ==========================================
+      // 8. DOWNLOAD GREETING CARD (PNG EXPORT)
+      // ==========================================
+      downloadCardBtn.addEventListener('click', () => {
+        audio.playHeartHarp();
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = W;
+        exportCanvas.height = H;
+        const exCtx = exportCanvas.getContext('2d');
+
+        // Render background + full bloomed bouquet + greeting card banner
+        drawRomanticBackground(exCtx, 0, performance.now() * 0.001);
+        drawVictoryBouquetScene(exCtx, 1.5, true);
+
+        const dataUrl = exportCanvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = 'thiep-20-10-darling-wifey.png';
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+
+      // ==========================================
+      // 9. MAIN UPDATE & RENDER LOOP (DELTA-TIME)
+      // ==========================================
+      let lastTimestamp = performance.now();
+
+      function gameLoop(timestamp) {
+        const dt = Math.min(0.05, Math.max(0.001, (timestamp - lastTimestamp) / 1000));
+        lastTimestamp = timestamp;
+        const timeSec = timestamp * 0.001;
+
+        // 1. Draw Background & Falling Petals
+        drawRomanticBackground(ctx, dt, timeSec);
+
+        // 2. State-specific updates
+        if (currentState === STATE.PLAYING) {
+          // Countdown timer
+          timeLeft -= dt;
+          if (timeLeft <= 0) {
+            timeLeft = 0;
+            // Win if 60s timer finishes without losing all 3 lives
+            if (lives > 0) {
+              triggerVictory();
+            }
+          }
+
+          // Buff countdown
+          if (activeBuff) {
+            buffTimeRemaining -= dt;
+            if (buffTimeRemaining <= 0) {
+              activeBuff = null;
+              buffTimeRemaining = 0;
+            }
+          }
+
+          // Player horizontal movement (Keyboard + smooth target interpolation)
+          const keyboardSpeed = 480;
+          if (keys.left) {
+            player.targetX -= keyboardSpeed * dt;
+          }
+          if (keys.right) {
+            player.targetX += keyboardSpeed * dt;
+          }
+          player.targetX = Math.max(player.width * 0.55, Math.min(W - player.width * 0.55, player.targetX));
+
+          const prevX = player.x;
+          player.x += (player.targetX - player.x) * Math.min(1, dt * 16);
+          player.vx = (player.x - prevX) / dt;
+          player.tilt = Math.max(-0.18, Math.min(0.18, player.vx * 0.00035));
+
+          if (player.hitFlash > 0) {
+            player.hitFlash = Math.max(0, player.hitFlash - dt);
+          }
+
+          // Spawn items
+          spawnCooldown -= dt;
+          if (spawnCooldown <= 0) {
+            spawnItem();
+            // Gentle, relaxed spawn pacing
+            const progress = (60 - timeLeft) / 60;
+            spawnCooldown = Math.max(0.42, 0.74 - progress * 0.18 + (Math.random() - 0.5) * 0.16);
+          }
+
+          // Update falling items
+          for (let i = fallingItems.length - 1; i >= 0; i--) {
+            const item = fallingItems[i];
+
+            // Magnet Mode pulls nearby roses & hearts directly toward the basket
+            if (activeBuff === 'MAGNET' && (item.type === 'ROSE' || item.type === 'HEART')) {
+              const dx = player.x - item.x;
+              const dy = (player.y - 10) - item.y;
+              const dist = Math.hypot(dx, dy);
+              if (dist < 320) {
+                item.magnetized = true;
+                const pullStrength = 600;
+                item.x += (dx / Math.max(1, dist)) * pullStrength * dt;
+                item.y += (dy / Math.max(1, dist)) * pullStrength * dt;
+                audio.playBuffPulse(true);
+
+                // Draw subtle golden-pink magnetic attraction line
+                ctx.save();
+                ctx.strokeStyle = 'rgba(251, 113, 133, 0.38)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(item.x, item.y);
+                ctx.lineTo(player.x, player.y - 8);
+                ctx.stroke();
+                ctx.restore();
+              } else {
+                item.magnetized = false;
+              }
+            }
+
+            if (!item.magnetized) {
+              item.y += item.vy * dt;
+              item.x += (item.vx + Math.sin(timeSec * 2.5 + item.swayPhase) * 15) * dt;
+            }
+            item.angle += item.spin * dt;
+
+            // Keep inside horizontal screen bounds
+            item.x = Math.max(28, Math.min(W - 28, item.x));
+
+            // Draw item
+            if (item.type === 'ROSE') {
+              drawProceduralRose(ctx, item.x, item.y, 1.05, item.angle, 1, true);
+            } else if (item.type === 'HEART') {
+              drawProceduralHeartItem(ctx, item.x, item.y, 1.0, Math.sin(timeSec * 4 + item.swayPhase) * 0.15);
+            } else if (item.type === 'GIFT') {
+              drawProceduralGiftBox(ctx, item.x, item.y, item.angle * 0.3, timeSec);
+            } else if (item.type === 'HAZARD') {
+              drawProceduralHazard(ctx, item, timeSec);
+            }
+
+            // Check collision with Player Basket hitbox (generous for flowers/hearts, forgiving for hazards)
+            const isGoodItem = item.type !== 'HAZARD';
+            const hitboxHalfW = isGoodItem ? player.width * 0.54 : player.width * 0.28;
+            const hitboxHalfH = isGoodItem ? 36 : 22;
+            const dx = Math.abs(item.x - player.x);
+            const dy = Math.abs(item.y - (player.y - 6));
+
+            if (dx < hitboxHalfW + item.radius * (isGoodItem ? 0.72 : 0.35) && dy < hitboxHalfH + item.radius * 0.45) {
+              const mult = activeBuff === 'MULTIPLIER' ? 2 : 1;
+
+              if (item.type === 'ROSE') {
+                const pts = 10 * mult;
+                score += pts;
+                rosesCaught++;
+                loveMeter = Math.min(100, loveMeter + 2);
+                audio.playRoseChime();
+                if (mult > 1) audio.playBuffPulse(false);
+                addFloatingText(item.x, item.y - 12, `+${pts} · +2% ♥`, '#E11D48', mult > 1 ? 1.2 : 1);
+                spawnBurst(item.x, item.y, '#F43F5E', 12, false);
+
+                if (loveMeter >= 100) {
+                  fallingItems.splice(i, 1);
+                  triggerVictory();
+                  break;
+                }
+              } else if (item.type === 'HEART') {
+                const pts = 20 * mult;
+                score += pts;
+                heartsCaught++;
+                loveMeter = Math.min(100, loveMeter + 8);
+                audio.playHeartHarp();
+                addFloatingText(item.x, item.y - 12, `+${pts} · +8% ♥`, '#EC4899', 1.15);
+                spawnBurst(item.x, item.y, '#FB7185', 16, true);
+
+                if (loveMeter >= 100) {
+                  fallingItems.splice(i, 1);
+                  triggerVictory();
+                  break;
+                }
+              } else if (item.type === 'GIFT') {
+                audio.playGiftFanfare();
+                activeBuff = Math.random() < 0.5 ? 'MAGNET' : 'MULTIPLIER';
+                buffTimeRemaining = 7.0;
+                loveMeter = Math.min(100, loveMeter + 5);
+                const buffText = activeBuff === 'MAGNET' ? '🎁 NAM CHÂM HÚT HOA (7s)!' : '🎁 NHÂN ĐÔI 2X ĐIỂM (7s)!';
+                addFloatingText(item.x, item.y - 18, buffText, '#D97706', 1.25);
+                spawnBurst(item.x, item.y, '#FBBF24', 22, true);
+
+                if (loveMeter >= 100) {
+                  fallingItems.splice(i, 1);
+                  triggerVictory();
+                  break;
+                }
+              } else if (item.type === 'HAZARD') {
+                // Brief invulnerability grace period after taking a hit
+                if (player.hitFlash <= 0) {
+                  lives = Math.max(0, lives - 1);
+                  score = Math.max(0, score - 15);
+                  player.hitFlash = 1.1;
+                  audio.playHazardThud();
+                  addFloatingText(item.x, item.y - 14, '-1 Tim · -15', '#881337', 1.15);
+                  spawnBurst(item.x, item.y, '#64748B', 14, false);
+
+                  if (lives <= 0) {
+                    fallingItems.splice(i, 1);
+                    triggerGameOver();
+                    break;
+                  }
+                }
+              }
+
+              fallingItems.splice(i, 1);
+              continue;
+            }
+
+            // Remove if off-screen bottom
+            if (item.y > H + 50) {
+              fallingItems.splice(i, 1);
+            }
+          }
+
+          // Draw Player Basket
+          drawPlayerBasket(ctx, timeSec);
+          updateHUD();
+        } else if (currentState === STATE.START || currentState === STATE.GAME_OVER) {
+          // Gentle idle animation of basket on Start / Game Over backdrop
+          player.x = W / 2 + Math.sin(timeSec * 1.4) * 45;
+          player.tilt = Math.cos(timeSec * 1.4) * 0.05;
+          drawPlayerBasket(ctx, timeSec);
+        } else if (currentState === STATE.VICTORY) {
+          // Update blooming bouquet & floating glowing particle hearts
+          victoryAnimTime += dt;
+          victoryHearts.forEach((h) => {
+            h.y += h.vy * dt;
+            h.x += (h.vx + Math.sin(timeSec * 2 + h.phase) * 18) * dt;
+            if (h.y < -30) {
+              h.y = H - 120;
+              h.x = W / 2 + (Math.random() - 0.5) * 420;
+            }
+          });
+          drawVictoryBouquetScene(ctx, victoryAnimTime, false);
+        }
+
+        // 3. Update & render burst particles
+        for (let i = burstParticles.length - 1; i >= 0; i--) {
+          const p = burstParticles[i];
+          p.life -= dt;
+          if (p.life <= 0) {
+            burstParticles.splice(i, 1);
+            continue;
+          }
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.vy += 190 * dt; // soft gravity
+
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+          ctx.fillStyle = p.color;
+          if (p.isHeart) {
+            drawHeartShape(ctx, p.x, p.y - p.size * 0.5, p.size * 1.5);
+            ctx.fill();
+          } else {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        // 4. Update & render floating score popups
+        for (let i = floatingTexts.length - 1; i >= 0; i--) {
+          const ft = floatingTexts[i];
+          ft.life -= dt;
+          if (ft.life <= 0) {
+            floatingTexts.splice(i, 1);
+            continue;
+          }
+          ft.y += ft.vy * dt;
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, ft.life / ft.maxLife);
+          ctx.font = `800 ${Math.round(17 * ft.scale)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 4;
+          ctx.strokeText(ft.text, ft.x, ft.y);
+          ctx.fillStyle = ft.color;
+          ctx.fillText(ft.text, ft.x, ft.y);
+          ctx.restore();
+        }
+
+        requestAnimationFrame(gameLoop);
+      }
+
+      updateHUD();
+      requestAnimationFrame(gameLoop);
+    })();
+  </script>
+</body>
+</html>

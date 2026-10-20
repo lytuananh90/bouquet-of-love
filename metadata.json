@@ -1,0 +1,6 @@
+{
+  "name": "Bouquet of Love — 20/10 Arcade Game",
+  "description": "A romantic 2D HTML5 Canvas arcade catching game celebrating Vietnamese Women's Day (October 20th) with procedural floral visuals, Web Audio synthesized music, and a downloadable greeting card.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
